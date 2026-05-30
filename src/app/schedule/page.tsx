@@ -1,11 +1,12 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, MapPinned, Plus, Trash2 } from "lucide-react";
 import { campusLocations } from "@/data/campusLocations";
 import {
   deleteSchedule,
+  getSchedules,
   saveSchedule,
   type ClassSchedule,
 } from "@/utils/schedules";
@@ -19,19 +20,8 @@ const days = [
   "Sabado",
 ];
 
-const schedulesKey = "leo.schedules";
-const schedulesEvent = "leo-schedules-change";
-
 export default function SchedulePage() {
-  const schedulesSnapshot = useSyncExternalStore(
-    subscribeToSchedules,
-    getSchedulesSnapshot,
-    getServerSchedulesSnapshot,
-  );
-  const schedules = useMemo(
-    () => parseSchedules(schedulesSnapshot),
-    [schedulesSnapshot],
-  );
+  const [schedules, setSchedules] = useState<ClassSchedule[]>([]);
   const [subject, setSubject] = useState("");
   const [locationId, setLocationId] = useState(campusLocations[0]?.id ?? "");
   const [classroom, setClassroom] = useState("");
@@ -39,22 +29,45 @@ export default function SchedulePage() {
   const [startTime, setStartTime] = useState("08:00");
   const [endTime, setEndTime] = useState("10:00");
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getSchedules()
+      .then((loadedSchedules) => {
+        if (isMounted) {
+          setSchedules(loadedSchedules);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const locationById = useMemo(
     () => new Map(campusLocations.map((location) => [location.id, location])),
     [],
   );
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
 
     if (!subject.trim() || !locationId || !classroom.trim()) {
-      setError("Completa materia, sede y salon.");
+      setError("Completa materia, sede y aula o referencia.");
       return;
     }
 
-    saveSchedule({
+    setIsSaving(true);
+    const newSchedule = await saveSchedule({
       subject: subject.trim(),
       locationId,
       classroom: classroom.trim(),
@@ -62,15 +75,18 @@ export default function SchedulePage() {
       startTime,
       endTime,
     });
+    setIsSaving(false);
 
-    notifySchedulesChange();
+    setSchedules((currentSchedules) => [...currentSchedules, newSchedule]);
     setSubject("");
     setClassroom("");
   };
 
-  const handleDelete = (scheduleId: string) => {
-    deleteSchedule(scheduleId);
-    notifySchedulesChange();
+  const handleDelete = async (scheduleId: string) => {
+    await deleteSchedule(scheduleId);
+    setSchedules((currentSchedules) =>
+      currentSchedules.filter((schedule) => schedule.id !== scheduleId),
+    );
   };
 
   return (
@@ -134,7 +150,7 @@ export default function SchedulePage() {
               </label>
 
               <label className="block text-sm text-[var(--up-gray)]">
-                Salon
+                Aula o referencia
                 <input
                   value={classroom}
                   onChange={(event) => setClassroom(event.target.value)}
@@ -188,10 +204,11 @@ export default function SchedulePage() {
 
               <button
                 type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--up-red)] py-3 font-semibold transition hover:bg-[var(--up-red-dark)]"
+                disabled={isSaving}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--up-red)] py-3 font-semibold transition hover:bg-[var(--up-red-dark)] disabled:cursor-wait disabled:opacity-70"
               >
                 <CalendarDays size={20} />
-                Guardar clase
+                {isSaving ? "Guardando..." : "Guardar clase"}
               </button>
             </div>
           </form>
@@ -206,7 +223,11 @@ export default function SchedulePage() {
               </div>
             </div>
 
-            {schedules.length === 0 ? (
+            {isLoading ? (
+              <div className="rounded-2xl border border-dashed border-white/15 p-6 text-sm text-[var(--up-gray)]/80">
+                Cargando horarios...
+              </div>
+            ) : schedules.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/15 p-6 text-sm text-[var(--up-gray)]/80">
                 Aun no tienes clases guardadas.
               </div>
@@ -233,7 +254,7 @@ export default function SchedulePage() {
 
                         <button
                           type="button"
-                          onClick={() => handleDelete(schedule.id)}
+                          onClick={() => void handleDelete(schedule.id)}
                           className="rounded-xl bg-white/10 p-2 transition hover:bg-white/20"
                           aria-label="Eliminar clase"
                         >
@@ -258,34 +279,4 @@ export default function SchedulePage() {
       </div>
     </main>
   );
-}
-
-function subscribeToSchedules(onStoreChange: () => void) {
-  window.addEventListener("storage", onStoreChange);
-  window.addEventListener(schedulesEvent, onStoreChange);
-
-  return () => {
-    window.removeEventListener("storage", onStoreChange);
-    window.removeEventListener(schedulesEvent, onStoreChange);
-  };
-}
-
-function getSchedulesSnapshot() {
-  return window.localStorage.getItem(schedulesKey) ?? "[]";
-}
-
-function getServerSchedulesSnapshot() {
-  return "[]";
-}
-
-function parseSchedules(snapshot: string) {
-  try {
-    return JSON.parse(snapshot) as ClassSchedule[];
-  } catch {
-    return [] as ClassSchedule[];
-  }
-}
-
-function notifySchedulesChange() {
-  window.dispatchEvent(new Event(schedulesEvent));
 }

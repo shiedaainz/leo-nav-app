@@ -14,8 +14,9 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
 
@@ -34,7 +35,9 @@ export default function RegisterPage() {
       return;
     }
 
-    const result = registerUser({ name, email, password });
+    setIsSubmitting(true);
+    const result = await registerUser({ name, email, password });
+    setIsSubmitting(false);
 
     if (!result.ok) {
       setError(result.message);
@@ -129,9 +132,10 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            className="w-full rounded-2xl bg-[var(--up-red)] py-3 font-semibold transition hover:bg-[var(--up-red-dark)]"
+            disabled={isSubmitting}
+            className="w-full rounded-2xl bg-[var(--up-red)] py-3 font-semibold transition hover:bg-[var(--up-red-dark)] disabled:cursor-wait disabled:opacity-70"
           >
-            Crear cuenta
+            {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
           </button>
           <div className="text-center text-sm text-[var(--up-gray)]/80">
           Ya tienes cuenta?{" "}

@@ -1,4 +1,6 @@
-﻿export interface LocalUser {
+﻿import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+
+export interface LocalUser {
   id: string;
   name: string;
   email: string;
@@ -16,7 +18,7 @@ export interface SessionUser {
 const USERS_KEY = "leo.users";
 const SESSION_KEY = "leo.session";
 
-export function registerUser({
+export async function registerUser({
   name,
   email,
   password,
@@ -25,6 +27,31 @@ export function registerUser({
   email: string;
   password: string;
 }) {
+  if (isSupabaseConfigured && supabase) {
+    const normalizedEmail = normalizeEmail(email);
+    const { error } = await supabase.auth.signUp({
+      email: normalizedEmail,
+      password,
+      options: {
+        data: {
+          name: name.trim(),
+          role: "student",
+        },
+      },
+    });
+
+    if (error) {
+      return {
+        ok: false as const,
+        message: translateSupabaseAuthError(error.message),
+      };
+    }
+
+    return {
+      ok: true as const,
+    };
+  }
+
   const normalizedEmail = normalizeEmail(email);
   const users = getUsers();
 
@@ -50,13 +77,45 @@ export function registerUser({
   };
 }
 
-export function loginUser({
+export async function loginUser({
   email,
   password,
 }: {
   email: string;
   password: string;
 }) {
+  if (isSupabaseConfigured && supabase) {
+    const normalizedEmail = normalizeEmail(email);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: normalizedEmail,
+      password,
+    });
+
+    if (error || !data.user) {
+      return {
+        ok: false as const,
+        message: "Correo o contrasena incorrectos.",
+      };
+    }
+
+    const sessionUser: SessionUser = {
+      id: data.user.id,
+      name:
+        typeof data.user.user_metadata.name === "string"
+          ? data.user.user_metadata.name
+          : normalizedEmail.split("@")[0],
+      email: data.user.email ?? normalizedEmail,
+      role: "student",
+    };
+
+    saveSession(sessionUser);
+
+    return {
+      ok: true as const,
+      user: sessionUser,
+    };
+  }
+
   const normalizedEmail = normalizeEmail(email);
   const user = getUsers().find(
     (candidate) =>
@@ -111,6 +170,14 @@ export function getSession() {
 
 export function logout() {
   window.localStorage.removeItem(SESSION_KEY);
+
+  if (isSupabaseConfigured && supabase) {
+    void supabase.auth.signOut();
+  }
+}
+
+export function isVisitorSession(user: SessionUser | null) {
+  return user?.role === "visitor";
 }
 
 function getUsers() {
@@ -150,4 +217,18 @@ function toSessionUser(user: LocalUser): SessionUser {
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
+}
+
+function translateSupabaseAuthError(message: string) {
+  const normalizedMessage = message.toLowerCase();
+
+  if (normalizedMessage.includes("already registered") || normalizedMessage.includes("already been registered")) {
+    return "Ya existe una cuenta con ese correo.";
+  }
+
+  if (normalizedMessage.includes("password")) {
+    return "La contrasena no cumple los requisitos minimos.";
+  }
+
+  return "No se pudo completar la operacion. Intentalo nuevamente.";
 }

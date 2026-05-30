@@ -293,6 +293,37 @@ Ejecutar build localmente:
 npm run start
 ```
 
+## Configuracion de Supabase
+
+Leo puede funcionar de dos formas:
+
+- Sin Supabase: usa `localStorage`, como el MVP inicial.
+- Con Supabase: usa usuarios reales y guarda horarios en base de datos.
+
+Para activar Supabase:
+
+1. Crear un proyecto gratuito en Supabase.
+2. Ir a Project Settings > API.
+3. Copiar:
+   - Project URL
+   - anon public key
+4. Crear un archivo `.env.local` basado en `.env.example`:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=tu_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
+```
+
+5. Ejecutar el SQL de:
+
+```text
+supabase/schema.sql
+```
+
+Ese SQL crea la tabla `schedules` y activa reglas para que cada usuario solo vea sus propios horarios.
+
+En Supabase Auth se recomienda desactivar temporalmente la confirmacion obligatoria por correo durante pruebas academicas, para que el usuario pueda registrarse e iniciar sesion inmediatamente.
+
 ## Uso en celular durante desarrollo
 
 Para abrir la app desde el celular en la misma red:

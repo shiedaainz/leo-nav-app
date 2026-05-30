@@ -21,8 +21,9 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
 
@@ -31,7 +32,9 @@ export default function LoginPage() {
       return;
     }
 
-    const result = loginUser({ email, password });
+    setIsSubmitting(true);
+    const result = await loginUser({ email, password });
+    setIsSubmitting(false);
 
     if (!result.ok) {
       setError(result.message);
@@ -113,9 +116,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full rounded-2xl bg-[var(--up-red)] py-3 font-semibold transition hover:bg-[var(--up-red-dark)]"
+            disabled={isSubmitting}
+            className="w-full rounded-2xl bg-[var(--up-red)] py-3 font-semibold transition hover:bg-[var(--up-red-dark)] disabled:cursor-wait disabled:opacity-70"
           >
-            Ingresar
+            {isSubmitting ? "Ingresando..." : "Ingresar"}
           </button>
 
           <button

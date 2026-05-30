@@ -101,6 +101,8 @@ Por ejemplo, un estudiante puede guardar una materia, la sede donde tiene clase,
 
 Luego puede tocar el horario y abrir directamente la ruta hacia esa sede.
 
+En una version conectada con Supabase, esos horarios pueden quedar guardados en una base de datos para el usuario.
+
 ### Camara guiada
 
 La app incluye una camara guiada basica.
@@ -248,7 +250,7 @@ Como es una primera version, hay cosas que aun pueden mejorar.
 
 Por ejemplo:
 
-- Los usuarios y horarios se guardan en el navegador, no en una base de datos en internet.
+- Si no se configura Supabase, los usuarios y horarios se guardan en el navegador.
 - La camara guiada es basica, no es realidad aumentada avanzada.
 - La app no reconoce objetos ni edificios con la camara.
 - La ubicacion dentro de edificios no esta incluida.
