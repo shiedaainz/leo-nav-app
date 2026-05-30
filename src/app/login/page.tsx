@@ -78,7 +78,7 @@ export default function LoginPage() {
         <form className="space-y-5 px-8 py-7" onSubmit={handleSubmit}>
           {showRegisteredMessage && (
             <p className="rounded-2xl border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-200">
-              Cuenta creada. Inicia sesion para continuar.
+              Cuenta creada. Si Supabase pide confirmacion, revisa tu correo antes de iniciar sesion.
             </p>
           )}
 

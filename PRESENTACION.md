@@ -37,6 +37,7 @@ Con Leo, el usuario puede:
 - Recibir instrucciones.
 - Usar su ubicacion actual si desea.
 - Guardar horarios opcionales.
+- Marcar destinos favoritos.
 - Usar una camara guiada como apoyo visual.
 
 La aplicacion esta pensada para usarse desde el celular, sin necesidad de instalar obligatoriamente nada.
@@ -102,6 +103,12 @@ Por ejemplo, un estudiante puede guardar una materia, la sede donde tiene clase,
 Luego puede tocar el horario y abrir directamente la ruta hacia esa sede.
 
 En una version conectada con Supabase, esos horarios pueden quedar guardados en una base de datos para el usuario.
+
+### Favoritos
+
+El usuario tambien puede marcar sedes como favoritas.
+
+Esto permite que los lugares mas usados aparezcan primero y sean mas faciles de encontrar.
 
 ### Camara guiada
 

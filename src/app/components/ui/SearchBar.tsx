@@ -1,9 +1,10 @@
 ﻿"use client";
 
-import { Search } from "lucide-react";
+import { Search, Star } from "lucide-react";
 import type { CampusLocation } from "@/data/campusLocations";
 
 interface SearchBarProps {
+  favoriteLocationIds: string[];
   locations: CampusLocation[];
   query: string;
   selectedLocation: CampusLocation | null;
@@ -12,6 +13,7 @@ interface SearchBarProps {
 }
 
 export default function SearchBar({
+  favoriteLocationIds,
   locations,
   query,
   selectedLocation,
@@ -43,27 +45,37 @@ export default function SearchBar({
 
       {results.length > 0 && (
         <div className="absolute left-4 right-4 top-full mt-2 max-h-64 overflow-y-auto rounded-2xl border border-white/10 bg-[var(--up-blue)] shadow-2xl sm:left-6 sm:right-6">
-          {results.map((location) => (
-            <button
-              key={location.id}
-              type="button"
-              onClick={() => onSelectLocation(location)}
-              className="flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-white/10"
-            >
-              <span
-                className="mt-1 h-3 w-3 shrink-0 rounded-full"
-                style={{ backgroundColor: location.color }}
-              />
-              <span>
-                <span className="block text-sm font-semibold text-white">
-                  {location.name}
+          {results.map((location) => {
+            const isFavorite = favoriteLocationIds.includes(location.id);
+
+            return (
+              <button
+                key={location.id}
+                type="button"
+                onClick={() => onSelectLocation(location)}
+                className="flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-white/10"
+              >
+                <span
+                  className="mt-1 h-3 w-3 shrink-0 rounded-full"
+                  style={{ backgroundColor: location.color }}
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-2 text-sm font-semibold text-white">
+                    {isFavorite && (
+                      <Star
+                        size={14}
+                        className="shrink-0 fill-yellow-300 text-yellow-300"
+                      />
+                    )}
+                    {location.name}
+                  </span>
+                  <span className="block text-xs text-[var(--up-gray)]/80">
+                    {location.description}
+                  </span>
                 </span>
-                <span className="block text-xs text-[var(--up-gray)]/80">
-                  {location.description}
-                </span>
-              </span>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -95,6 +107,12 @@ export default function SearchBar({
                     : "border-white/15 bg-white/10 text-[var(--up-gray)] hover:bg-white/20"
                 }`}
               >
+                {favoriteLocationIds.includes(location.id) && (
+                  <Star
+                    size={12}
+                    className="mr-1 inline fill-yellow-300 text-yellow-300"
+                  />
+                )}
                 {location.name}
               </button>
             );

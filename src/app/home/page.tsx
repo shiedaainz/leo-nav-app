@@ -22,6 +22,11 @@ import {
 } from "@/utils/dijkstra";
 import { calculateDistanceInMeters, findNearestNode } from "@/utils/geo";
 import { logout, type SessionUser } from "@/utils/auth";
+import {
+  addFavoriteLocation,
+  getFavoriteLocationIds,
+  removeFavoriteLocation,
+} from "@/utils/favorites";
 
 export default function HomePage() {
   const router = useRouter();
@@ -40,6 +45,7 @@ export default function HomePage() {
   const [manualLocationId, setManualLocationId] = useState<string | null>(null);
   const [activeRoute, setActiveRoute] = useState<CalculatedRoute | null>(null);
   const [isCameraGuideOpen, setIsCameraGuideOpen] = useState(false);
+  const [favoriteLocationIds, setFavoriteLocationIds] = useState<string[]>([]);
   const { error, isLocating, location, startTracking } = useGeolocation();
 
   useEffect(() => {
@@ -47,6 +53,39 @@ export default function HomePage() {
       router.replace("/login");
     }
   }, [router, sessionSnapshot]);
+
+  useEffect(() => {
+    if (!sessionUser) {
+      return;
+    }
+
+    let isMounted = true;
+
+    getFavoriteLocationIds().then((locationIds) => {
+      if (isMounted) {
+        setFavoriteLocationIds(locationIds);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [sessionUser]);
+
+  const sortedLocations = useMemo(() => {
+    const favoriteSet = new Set(favoriteLocationIds);
+
+    return [...campusLocations].sort((firstLocation, secondLocation) => {
+      const firstIsFavorite = favoriteSet.has(firstLocation.id);
+      const secondIsFavorite = favoriteSet.has(secondLocation.id);
+
+      if (firstIsFavorite === secondIsFavorite) {
+        return 0;
+      }
+
+      return firstIsFavorite ? -1 : 1;
+    });
+  }, [favoriteLocationIds]);
 
   const selectedLocation = useMemo(() => {
     const selectedId = manualLocationId ?? destinationSnapshot ?? campusLocations[0]?.id;
@@ -148,6 +187,27 @@ export default function HomePage() {
     setActiveRoute(route);
   };
 
+  const handleToggleFavorite = async () => {
+    if (!selectedLocation) {
+      return;
+    }
+
+    const isFavorite = favoriteLocationIds.includes(selectedLocation.id);
+
+    if (isFavorite) {
+      setFavoriteLocationIds((currentIds) =>
+        currentIds.filter((locationId) => locationId !== selectedLocation.id),
+      );
+      await removeFavoriteLocation(selectedLocation.id);
+      return;
+    }
+
+    setFavoriteLocationIds((currentIds) => [
+      ...new Set([...currentIds, selectedLocation.id]),
+    ]);
+    await addFavoriteLocation(selectedLocation.id);
+  };
+
   const handleLogout = () => {
     logout();
     router.replace("/login");
@@ -165,7 +225,8 @@ export default function HomePage() {
     <main className="relative min-h-screen overflow-x-hidden bg-[var(--up-blue-dark)] pb-6 text-white">
       <Header userName={sessionUser.name} onLogout={handleLogout} />
       <SearchBar
-        locations={campusLocations}
+        favoriteLocationIds={favoriteLocationIds}
+        locations={sortedLocations}
         query={query}
         selectedLocation={selectedLocation}
         onQueryChange={setQuery}
@@ -184,6 +245,9 @@ export default function HomePage() {
         activeRoute={activeRoute}
         nearestStartNode={nearestStartNode}
         routePreview={routePreview}
+        isSelectedFavorite={
+          selectedLocation ? favoriteLocationIds.includes(selectedLocation.id) : false
+        }
         selectedLocation={selectedLocation}
         usingGps={Boolean(location)}
         onCancelNavigation={() => {
@@ -192,6 +256,7 @@ export default function HomePage() {
         }}
         onOpenCameraGuide={() => setIsCameraGuideOpen(true)}
         onStartNavigation={handleStartNavigation}
+        onToggleFavorite={handleToggleFavorite}
       />
       <LeoAvatar message={leoMessage} />
       {isCameraGuideOpen && activeRoute && (

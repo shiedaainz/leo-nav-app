@@ -17,6 +17,7 @@ El proyecto esta construido como una Progressive Web App (PWA), por lo que puede
 - Navegacion activa con distancia, tiempo estimado e instrucciones.
 - Leo como asistente visual con mensajes segun el estado de la ruta.
 - Horarios manuales opcionales guardados en el navegador.
+- Favoritos de destinos por usuario.
 - Camara guiada basica con overlay visual.
 - PWA basica con manifest, iconos y service worker.
 - Responsive para uso en celular.
@@ -186,7 +187,20 @@ Archivos principales:
 - `src/app/schedule/page.tsx`
 - `src/utils/schedules.ts`
 
-### 9. Camara guiada basica
+### 9. Favoritos
+
+Leo permite marcar destinos como favoritos. Los favoritos aparecen primero en los botones rapidos y se identifican con una estrella.
+
+Si Supabase esta configurado, los favoritos se guardan por usuario en la tabla `favorites`. Si no esta configurado, se guardan localmente en el navegador.
+
+Archivos principales:
+
+- `src/utils/favorites.ts`
+- `src/app/home/page.tsx`
+- `src/app/components/ui/SearchBar.tsx`
+- `src/app/components/navigation/NavigationPanel.tsx`
+
+### 10. Camara guiada basica
 
 La camara guiada es una pseudo-AR. No hace reconocimiento visual ni AR real. Abre la camara del dispositivo y pone encima un overlay con:
 
@@ -202,7 +216,7 @@ Archivo principal:
 
 - `src/app/components/navigation/CameraGuide.tsx`
 
-### 10. PWA
+### 11. PWA
 
 Leo incluye configuracion PWA basica:
 
@@ -321,6 +335,7 @@ supabase/schema.sql
 ```
 
 Ese SQL crea la tabla `schedules` y activa reglas para que cada usuario solo vea sus propios horarios.
+Tambien crea la tabla `favorites`, que permite guardar sedes favoritas por usuario.
 
 En Supabase Auth se recomienda desactivar temporalmente la confirmacion obligatoria por correo durante pruebas academicas, para que el usuario pueda registrarse e iniciar sesion inmediatamente.
 

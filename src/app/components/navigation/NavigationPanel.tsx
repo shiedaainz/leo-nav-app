@@ -1,4 +1,4 @@
-﻿import { Camera, Clock3, MapPinned, Navigation, X } from "lucide-react";
+﻿import { Camera, Clock3, MapPinned, Navigation, Star, X } from "lucide-react";
 import type { CampusLocation } from "@/data/campusLocations";
 import type { CampusNode } from "@/data/campusGraph";
 import type { CalculatedRoute } from "@/utils/dijkstra";
@@ -9,23 +9,27 @@ interface NavigationPanelProps {
     node: CampusNode;
     distance: number;
   } | null;
+  isSelectedFavorite: boolean;
   routePreview: CalculatedRoute | null;
   selectedLocation: CampusLocation | null;
   usingGps: boolean;
   onCancelNavigation: () => void;
   onOpenCameraGuide: () => void;
   onStartNavigation: () => void;
+  onToggleFavorite: () => void;
 }
 
 export default function NavigationPanel({
   activeRoute,
   nearestStartNode,
+  isSelectedFavorite,
   routePreview,
   selectedLocation,
   usingGps,
   onCancelNavigation,
   onOpenCameraGuide,
   onStartNavigation,
+  onToggleFavorite,
 }: NavigationPanelProps) {
   const title = selectedLocation?.name ?? "Selecciona un destino";
   const originText = nearestStartNode
@@ -76,11 +80,27 @@ export default function NavigationPanel({
             )}
           </div>
 
-          <div className="flex shrink-0 items-center gap-2 rounded-2xl bg-white/10 px-3 py-2 sm:px-4 sm:py-3">
-            <Clock3 size={18} />
-            <span className="text-sm">
-              {estimatedMinutes > 0 ? `${estimatedMinutes} min` : "--"}
-            </span>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              disabled={!selectedLocation}
+              onClick={onToggleFavorite}
+              className="rounded-2xl bg-white/10 p-3 transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label={
+                isSelectedFavorite ? "Quitar de favoritos" : "Agregar a favoritos"
+              }
+            >
+              <Star
+                size={18}
+                className={isSelectedFavorite ? "fill-yellow-300 text-yellow-300" : ""}
+              />
+            </button>
+            <div className="flex items-center gap-2 rounded-2xl bg-white/10 px-3 py-2 sm:px-4 sm:py-3">
+              <Clock3 size={18} />
+              <span className="text-sm">
+                {estimatedMinutes > 0 ? `${estimatedMinutes} min` : "--"}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -188,5 +208,6 @@ export default function NavigationPanel({
 function isGenericNodeName(name: string) {
   return /^Nodo \d+$/i.test(name.trim());
 }
+
 
 

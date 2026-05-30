@@ -29,27 +29,34 @@ export async function registerUser({
 }) {
   if (isSupabaseConfigured && supabase) {
     const normalizedEmail = normalizeEmail(email);
-    const { error } = await supabase.auth.signUp({
-      email: normalizedEmail,
-      password,
-      options: {
-        data: {
-          name: name.trim(),
-          role: "student",
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: normalizedEmail,
+        password,
+        options: {
+          data: {
+            name: name.trim(),
+            role: "student",
+          },
         },
-      },
-    });
+      });
 
-    if (error) {
+      if (error) {
+        return {
+          ok: false as const,
+          message: translateSupabaseAuthError(error.message),
+        };
+      }
+
+      return {
+        ok: true as const,
+      };
+    } catch {
       return {
         ok: false as const,
-        message: translateSupabaseAuthError(error.message),
+        message: "No se pudo conectar con Supabase. Revisa tu conexion.",
       };
     }
-
-    return {
-      ok: true as const,
-    };
   }
 
   const normalizedEmail = normalizeEmail(email);
@@ -86,34 +93,43 @@ export async function loginUser({
 }) {
   if (isSupabaseConfigured && supabase) {
     const normalizedEmail = normalizeEmail(email);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: normalizedEmail,
-      password,
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password,
+      });
 
-    if (error || !data.user) {
+      if (error || !data.user) {
+        return {
+          ok: false as const,
+          message: translateSupabaseAuthError(
+            error?.message ?? "Invalid login credentials",
+          ),
+        };
+      }
+
+      const sessionUser: SessionUser = {
+        id: data.user.id,
+        name:
+          typeof data.user.user_metadata.name === "string"
+            ? data.user.user_metadata.name
+            : normalizedEmail.split("@")[0],
+        email: data.user.email ?? normalizedEmail,
+        role: "student",
+      };
+
+      saveSession(sessionUser);
+
+      return {
+        ok: true as const,
+        user: sessionUser,
+      };
+    } catch {
       return {
         ok: false as const,
-        message: "Correo o contrasena incorrectos.",
+        message: "No se pudo conectar con Supabase. Revisa tu conexion.",
       };
     }
-
-    const sessionUser: SessionUser = {
-      id: data.user.id,
-      name:
-        typeof data.user.user_metadata.name === "string"
-          ? data.user.user_metadata.name
-          : normalizedEmail.split("@")[0],
-      email: data.user.email ?? normalizedEmail,
-      role: "student",
-    };
-
-    saveSession(sessionUser);
-
-    return {
-      ok: true as const,
-      user: sessionUser,
-    };
   }
 
   const normalizedEmail = normalizeEmail(email);
@@ -222,8 +238,34 @@ function normalizeEmail(email: string) {
 function translateSupabaseAuthError(message: string) {
   const normalizedMessage = message.toLowerCase();
 
-  if (normalizedMessage.includes("already registered") || normalizedMessage.includes("already been registered")) {
+  if (
+    normalizedMessage.includes("already registered") ||
+    normalizedMessage.includes("already been registered") ||
+    normalizedMessage.includes("user already registered")
+  ) {
     return "Ya existe una cuenta con ese correo.";
+  }
+
+  if (
+    normalizedMessage.includes("signups not allowed") ||
+    normalizedMessage.includes("signup disabled") ||
+    normalizedMessage.includes("signups are disabled")
+  ) {
+    return "El registro de usuarios esta desactivado en Supabase. Activa los signups en Authentication.";
+  }
+
+  if (
+    normalizedMessage.includes("email not confirmed") ||
+    normalizedMessage.includes("not confirmed")
+  ) {
+    return "Tu correo aun no esta confirmado. Revisa tu email o desactiva la confirmacion en Supabase para pruebas.";
+  }
+
+  if (
+    normalizedMessage.includes("invalid login credentials") ||
+    normalizedMessage.includes("invalid credentials")
+  ) {
+    return "Correo o contrasena incorrectos.";
   }
 
   if (normalizedMessage.includes("password")) {
