@@ -38,6 +38,7 @@ Con Leo, el usuario puede:
 - Usar su ubicacion actual si desea.
 - Guardar horarios opcionales.
 - Marcar destinos favoritos.
+- Consultar un perfil con resumen de actividad.
 - Usar una camara guiada como apoyo visual.
 
 La aplicacion esta pensada para usarse desde el celular, sin necesidad de instalar obligatoriamente nada.
@@ -109,6 +110,12 @@ En una version conectada con Supabase, esos horarios pueden quedar guardados en 
 El usuario tambien puede marcar sedes como favoritas.
 
 Esto permite que los lugares mas usados aparezcan primero y sean mas faciles de encontrar.
+
+### Perfil
+
+La app cuenta con una pantalla de perfil donde el usuario puede ver sus datos, sus favoritos guardados y sus horarios.
+
+Esto ayuda a que Leo se sienta mas personal y no solo como un mapa.
 
 ### Camara guiada
 

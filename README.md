@@ -9,6 +9,7 @@ El proyecto esta construido como una Progressive Web App (PWA), por lo que puede
 - Splash screen con Leo como identidad visual de la app.
 - Login, registro y acceso como visitante.
 - Registro seguro para el MVP: despues de crear cuenta, el usuario vuelve al login.
+- Perfil de usuario con datos y resumen de actividad.
 - Mapa interactivo con Leaflet y OpenStreetMap.
 - Busqueda de sedes y destinos principales.
 - Botones rapidos para elegir destinos.
@@ -200,7 +201,17 @@ Archivos principales:
 - `src/app/components/ui/SearchBar.tsx`
 - `src/app/components/navigation/NavigationPanel.tsx`
 
-### 10. Camara guiada basica
+### 10. Perfil
+
+La pantalla de perfil muestra el nombre, correo, tipo de cuenta, cantidad de favoritos y cantidad de horarios guardados.
+
+Desde el perfil el usuario puede volver al mapa, abrir horarios o cerrar sesion.
+
+Archivo principal:
+
+- `src/app/profile/page.tsx`
+
+### 11. Camara guiada basica
 
 La camara guiada es una pseudo-AR. No hace reconocimiento visual ni AR real. Abre la camara del dispositivo y pone encima un overlay con:
 
@@ -216,7 +227,7 @@ Archivo principal:
 
 - `src/app/components/navigation/CameraGuide.tsx`
 
-### 11. PWA
+### 12. PWA
 
 Leo incluye configuracion PWA basica:
 
@@ -407,6 +418,7 @@ src/
     register/page.tsx        Registro
     home/page.tsx            Pantalla principal
     schedule/page.tsx        Horarios
+    profile/page.tsx         Perfil
     manifest.ts              Manifest PWA
     components/
       leo/LeoAvatar.tsx

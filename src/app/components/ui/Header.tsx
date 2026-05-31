@@ -24,9 +24,13 @@ export default function Header({ userName, onLogout }: HeaderProps) {
         >
           <CalendarDays size={22} />
         </Link>
-        <button className="rounded-2xl bg-white/10 p-3" aria-label="Perfil">
+        <Link
+          href="/profile"
+          className="rounded-2xl bg-white/10 p-3 transition hover:bg-white/20"
+          aria-label="Perfil"
+        >
           <User size={22} />
-        </button>
+        </Link>
         <button
           type="button"
           onClick={onLogout}
