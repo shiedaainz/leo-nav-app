@@ -46,6 +46,8 @@ export default function HomePage() {
   const [activeRoute, setActiveRoute] = useState<CalculatedRoute | null>(null);
   const [isCameraGuideOpen, setIsCameraGuideOpen] = useState(false);
   const [favoriteLocationIds, setFavoriteLocationIds] = useState<string[]>([]);
+  const [isLeoListening, setIsLeoListening] = useState(false);
+  const [leoVoiceMessage, setLeoVoiceMessage] = useState<string | null>(null);
   const { error, isLocating, location, startTracking } = useGeolocation();
 
   useEffect(() => {
@@ -135,7 +137,7 @@ export default function HomePage() {
     });
   }, [location, selectedLocation]);
 
-  const leoMessage = useMemo(
+  const routeLeoMessage = useMemo(
     () =>
       getLeoMessage({
         activeRoute,
@@ -156,6 +158,7 @@ export default function HomePage() {
       selectedLocation,
     ],
   );
+  const leoMessage = leoVoiceMessage ?? routeLeoMessage;
 
   const handleSelectLocation = (locationToSelect: CampusLocation) => {
     setManualLocationId(locationToSelect.id);
@@ -213,6 +216,90 @@ export default function HomePage() {
     router.replace("/login");
   };
 
+  const handleLeoSpeak = () => {
+    if (!("speechSynthesis" in window)) {
+      setLeoVoiceMessage("Tu navegador no permite voz en este momento.");
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(leoMessage);
+    utterance.lang = "es-CO";
+    utterance.rate = 0.95;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleLeoListen = () => {
+    const SpeechRecognitionConstructor = getSpeechRecognitionConstructor();
+
+    if (!SpeechRecognitionConstructor) {
+      setLeoVoiceMessage("Tu navegador no permite reconocimiento de voz.");
+      return;
+    }
+
+    const recognition = new SpeechRecognitionConstructor();
+    recognition.lang = "es-CO";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    setIsLeoListening(true);
+    setLeoVoiceMessage("Te escucho. Puedes decir biblioteca, horarios, perfil o iniciar ruta.");
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0]?.[0]?.transcript ?? "";
+      handleLeoCommand(transcript);
+    };
+
+    recognition.onerror = () => {
+      setLeoVoiceMessage("No pude escuchar bien. Intentalo de nuevo.");
+    };
+
+    recognition.onend = () => {
+      setIsLeoListening(false);
+    };
+
+    recognition.start();
+  };
+
+  const handleLeoCommand = (rawCommand: string) => {
+    const command = normalizeCommand(rawCommand);
+
+    if (command.includes("horario")) {
+      router.push("/schedule");
+      return;
+    }
+
+    if (command.includes("perfil")) {
+      router.push("/profile");
+      return;
+    }
+
+    if (command.includes("ubicacion") || command.includes("ubicación")) {
+      startTracking();
+      setLeoVoiceMessage("Voy a buscar tu ubicacion.");
+      return;
+    }
+
+    if (
+      command.includes("iniciar") ||
+      command.includes("navegar") ||
+      command.includes("ruta")
+    ) {
+      handleStartNavigation();
+      setLeoVoiceMessage("Listo. Inicie la ruta hacia el destino seleccionado.");
+      return;
+    }
+
+    const matchedLocation = findLocationByVoiceCommand(command, campusLocations);
+
+    if (matchedLocation) {
+      handleSelectLocation(matchedLocation);
+      setLeoVoiceMessage(`Destino seleccionado: ${matchedLocation.name}.`);
+      return;
+    }
+
+    setLeoVoiceMessage(`Escuche: ${rawCommand}. No encontre un comando para eso.`);
+  };
+
   if (!sessionUser) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[var(--up-blue-dark)] text-sm text-[var(--up-gray)]/80">
@@ -258,7 +345,12 @@ export default function HomePage() {
         onStartNavigation={handleStartNavigation}
         onToggleFavorite={handleToggleFavorite}
       />
-      <LeoAvatar message={leoMessage} />
+      <LeoAvatar
+        isListening={isLeoListening}
+        message={leoMessage}
+        onListen={handleLeoListen}
+        onSpeak={handleLeoSpeak}
+      />
       {isCameraGuideOpen && activeRoute && (
         <CameraGuide
           activeRoute={activeRoute}
@@ -356,4 +448,79 @@ function getLeoMessage({
   }
 
   return "Hola, soy Leo. Busca una sede o elige un destino rapido para empezar.";
+}
+
+interface SpeechRecognitionResultEvent extends Event {
+  results: {
+    [index: number]: {
+      [index: number]: {
+        transcript: string;
+      };
+    };
+  };
+}
+
+interface BrowserSpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+  onresult: ((event: SpeechRecognitionResultEvent) => void) | null;
+  start: () => void;
+}
+
+type SpeechRecognitionConstructor = new () => BrowserSpeechRecognition;
+
+function getSpeechRecognitionConstructor() {
+  const speechWindow = window as Window & {
+    SpeechRecognition?: SpeechRecognitionConstructor;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
+  };
+
+  return speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null;
+}
+
+function normalizeCommand(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function findLocationByVoiceCommand(
+  command: string,
+  locations: CampusLocation[],
+) {
+  return locations.find((locationToFind) => {
+    const normalizedName = normalizeCommand(locationToFind.name);
+    const normalizedDescription = normalizeCommand(locationToFind.description);
+
+    if (normalizedName.includes(command) || command.includes(normalizedName)) {
+      return true;
+    }
+
+    if (normalizedDescription.includes(command)) {
+      return true;
+    }
+
+    if (locationToFind.id === "virgen-del-rosario" && command.includes("rosario")) {
+      return true;
+    }
+
+    if (locationToFind.id === "club-del-comercio" && command.includes("club")) {
+      return true;
+    }
+
+    if (locationToFind.id === "entrada-principal" && command.includes("entrada")) {
+      return true;
+    }
+
+    if (locationToFind.id === "plaza-central" && command.includes("plaza")) {
+      return true;
+    }
+
+    return false;
+  });
 }

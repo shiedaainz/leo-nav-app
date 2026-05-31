@@ -59,6 +59,8 @@ Por ejemplo, Leo puede indicar:
 
 La idea es que la experiencia sea mas amigable, no tan fria como un mapa tradicional.
 
+Leo tambien puede hablar y escuchar comandos simples. Por ejemplo, el usuario puede pedir una sede por voz o pedir abrir horarios.
+
 ## 5. Que hace la aplicacion
 
 Leo tiene varias funciones principales.
@@ -117,6 +119,12 @@ Esto permite que los lugares mas usados aparezcan primero y sean mas faciles de 
 La app cuenta con una pantalla de perfil donde el usuario puede ver sus datos, sus favoritos guardados y sus horarios.
 
 Esto ayuda a que Leo se sienta mas personal y no solo como un mapa.
+
+### Voz de Leo
+
+Leo puede leer sus mensajes en voz alta y escuchar comandos basicos.
+
+Por ejemplo, el usuario puede decir biblioteca, perfil, horarios o iniciar ruta.
 
 ### Camara guiada
 

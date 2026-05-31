@@ -17,6 +17,7 @@ El proyecto esta construido como una Progressive Web App (PWA), por lo que puede
 - Ruta recomendada antes de iniciar navegacion.
 - Navegacion activa con distancia, tiempo estimado e instrucciones.
 - Leo como asistente visual con mensajes segun el estado de la ruta.
+- Voz de Leo con lectura de mensajes y comandos basicos por microfono.
 - Horarios manuales opcionales guardados en el navegador.
 - Edicion y eliminacion de horarios.
 - Favoritos de destinos por usuario.
@@ -164,6 +165,18 @@ Los mensajes cambian segun el estado:
 - Llegada al destino cuando el usuario esta cerca.
 
 Esto cumple la idea del asistente del MVP sin usar IA avanzada.
+
+Leo tambien puede leer su mensaje en voz alta usando la sintesis de voz del navegador. Ademas puede escuchar comandos simples cuando el navegador soporta reconocimiento de voz.
+
+Comandos de ejemplo:
+
+- `biblioteca`
+- `sede casona`
+- `virgen del rosario`
+- `horarios`
+- `perfil`
+- `iniciar ruta`
+- `ubicacion`
 
 Archivo principal:
 
