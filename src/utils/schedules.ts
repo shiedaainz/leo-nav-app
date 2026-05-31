@@ -104,6 +104,37 @@ export async function deleteSchedule(scheduleId: string) {
   }
 }
 
+export async function updateSchedule(
+  scheduleId: string,
+  schedule: Omit<ClassSchedule, "id">,
+) {
+  const session = getSession();
+
+  if (!isSupabaseConfigured || !supabase || isVisitorSession(session)) {
+    return updateLocalSchedule(scheduleId, schedule);
+  }
+
+  const { data, error } = await supabase
+    .from("schedules")
+    .update({
+      subject: schedule.subject,
+      location_id: schedule.locationId,
+      classroom: schedule.classroom,
+      day: schedule.day,
+      start_time: schedule.startTime,
+      end_time: schedule.endTime,
+    })
+    .eq("id", scheduleId)
+    .select("id, subject, location_id, classroom, day, start_time, end_time")
+    .single();
+
+  if (error || !data) {
+    return updateLocalSchedule(scheduleId, schedule);
+  }
+
+  return fromScheduleRow(data);
+}
+
 function saveLocalSchedule(schedule: Omit<ClassSchedule, "id">) {
   const schedules = getLocalSchedules();
   const newSchedule: ClassSchedule = {
@@ -122,6 +153,23 @@ function saveLocalSchedule(schedule: Omit<ClassSchedule, "id">) {
 function deleteLocalSchedule(scheduleId: string) {
   const schedules = getLocalSchedules().filter((schedule) => schedule.id !== scheduleId);
   window.localStorage.setItem(SCHEDULES_KEY, JSON.stringify(schedules));
+}
+
+function updateLocalSchedule(
+  scheduleId: string,
+  schedule: Omit<ClassSchedule, "id">,
+) {
+  const updatedSchedule: ClassSchedule = {
+    ...schedule,
+    id: scheduleId,
+  };
+  const schedules = getLocalSchedules().map((currentSchedule) =>
+    currentSchedule.id === scheduleId ? updatedSchedule : currentSchedule,
+  );
+
+  window.localStorage.setItem(SCHEDULES_KEY, JSON.stringify(schedules));
+
+  return updatedSchedule;
 }
 
 function fromScheduleRow(row: ScheduleRow): ClassSchedule {

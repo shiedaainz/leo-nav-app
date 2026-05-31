@@ -102,6 +102,7 @@ Leo tambien permite guardar horarios manualmente.
 Por ejemplo, un estudiante puede guardar una materia, la sede donde tiene clase, el dia y la hora.
 
 Luego puede tocar el horario y abrir directamente la ruta hacia esa sede.
+Si necesita cambiar un dato, puede editar el horario sin borrarlo.
 
 En una version conectada con Supabase, esos horarios pueden quedar guardados en una base de datos para el usuario.
 

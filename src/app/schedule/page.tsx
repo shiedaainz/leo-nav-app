@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { CalendarDays, MapPinned, Plus, Trash2 } from "lucide-react";
+import { CalendarDays, MapPinned, Pencil, Plus, Trash2, X } from "lucide-react";
 import { campusLocations } from "@/data/campusLocations";
 import {
   deleteSchedule,
   getSchedules,
   saveSchedule,
+  updateSchedule,
   type ClassSchedule,
 } from "@/utils/schedules";
 
@@ -31,6 +32,7 @@ export default function SchedulePage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [editingScheduleId, setEditingScheduleId] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -67,19 +69,28 @@ export default function SchedulePage() {
     }
 
     setIsSaving(true);
-    const newSchedule = await saveSchedule({
+    const schedulePayload = {
       subject: subject.trim(),
       locationId,
       classroom: classroom.trim(),
       day,
       startTime,
       endTime,
-    });
+    };
+
+    const savedSchedule = editingScheduleId
+      ? await updateSchedule(editingScheduleId, schedulePayload)
+      : await saveSchedule(schedulePayload);
     setIsSaving(false);
 
-    setSchedules((currentSchedules) => [...currentSchedules, newSchedule]);
-    setSubject("");
-    setClassroom("");
+    setSchedules((currentSchedules) =>
+      editingScheduleId
+        ? currentSchedules.map((schedule) =>
+            schedule.id === editingScheduleId ? savedSchedule : schedule,
+          )
+        : [...currentSchedules, savedSchedule],
+    );
+    clearForm();
   };
 
   const handleDelete = async (scheduleId: string) => {
@@ -87,6 +98,27 @@ export default function SchedulePage() {
     setSchedules((currentSchedules) =>
       currentSchedules.filter((schedule) => schedule.id !== scheduleId),
     );
+  };
+
+  const handleEdit = (schedule: ClassSchedule) => {
+    setEditingScheduleId(schedule.id);
+    setSubject(schedule.subject);
+    setLocationId(schedule.locationId);
+    setClassroom(schedule.classroom);
+    setDay(schedule.day);
+    setStartTime(schedule.startTime);
+    setEndTime(schedule.endTime);
+    setError(null);
+  };
+
+  const clearForm = () => {
+    setEditingScheduleId(null);
+    setSubject("");
+    setLocationId(campusLocations[0]?.id ?? "");
+    setClassroom("");
+    setDay(days[0]);
+    setStartTime("08:00");
+    setEndTime("10:00");
   };
 
   return (
@@ -116,9 +148,13 @@ export default function SchedulePage() {
                 <Plus size={22} />
               </div>
               <div>
-                <h2 className="text-xl font-bold">Nueva clase</h2>
+                <h2 className="text-xl font-bold">
+                  {editingScheduleId ? "Editar clase" : "Nueva clase"}
+                </h2>
                 <p className="text-sm text-[var(--up-gray)]/80">
-                  Guardala para acceder rapido a su ruta.
+                  {editingScheduleId
+                    ? "Actualiza los datos de tu horario."
+                    : "Guardala para acceder rapido a su ruta."}
                 </p>
               </div>
             </div>
@@ -208,8 +244,25 @@ export default function SchedulePage() {
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--up-red)] py-3 font-semibold transition hover:bg-[var(--up-red-dark)] disabled:cursor-wait disabled:opacity-70"
               >
                 <CalendarDays size={20} />
-                {isSaving ? "Guardando..." : "Guardar clase"}
+                {isSaving
+                  ? editingScheduleId
+                    ? "Actualizando..."
+                    : "Guardando..."
+                  : editingScheduleId
+                    ? "Actualizar clase"
+                    : "Guardar clase"}
               </button>
+
+              {editingScheduleId && (
+                <button
+                  type="button"
+                  onClick={clearForm}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 py-3 font-semibold transition hover:bg-white/20"
+                >
+                  <X size={20} />
+                  Cancelar edicion
+                </button>
+              )}
             </div>
           </form>
 
@@ -252,14 +305,24 @@ export default function SchedulePage() {
                           </p>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={() => void handleDelete(schedule.id)}
-                          className="rounded-xl bg-white/10 p-2 transition hover:bg-white/20"
-                          aria-label="Eliminar clase"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                        <div className="flex shrink-0 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEdit(schedule)}
+                            className="rounded-xl bg-white/10 p-2 transition hover:bg-white/20"
+                            aria-label="Editar clase"
+                          >
+                            <Pencil size={18} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void handleDelete(schedule.id)}
+                            className="rounded-xl bg-white/10 p-2 transition hover:bg-white/20"
+                            aria-label="Eliminar clase"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
                       </div>
 
                       <Link

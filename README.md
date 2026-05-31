@@ -18,6 +18,7 @@ El proyecto esta construido como una Progressive Web App (PWA), por lo que puede
 - Navegacion activa con distancia, tiempo estimado e instrucciones.
 - Leo como asistente visual con mensajes segun el estado de la ruta.
 - Horarios manuales opcionales guardados en el navegador.
+- Edicion y eliminacion de horarios.
 - Favoritos de destinos por usuario.
 - Camara guiada basica con overlay visual.
 - PWA basica con manifest, iconos y service worker.
@@ -182,6 +183,7 @@ Cada horario tiene:
 - Hora de fin.
 
 Los horarios se guardan en `localStorage` bajo la clave `leo.schedules`. Desde cada horario se puede abrir el mapa con el destino seleccionado.
+Tambien se pueden editar o eliminar desde la misma pantalla.
 
 Archivos principales:
 
