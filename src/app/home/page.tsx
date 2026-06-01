@@ -178,7 +178,7 @@ export default function HomePage() {
     setActiveRoute(null);
     setIsCameraGuideOpen(false);
     setQuery("");
-    const message = `Destino seleccionado: ${locationToSelect.name}. Cuando estes listo, inicia la ruta.`;
+    const message = `${locationToSelect.name} seleccionado. Cuando quieras, iniciamos la ruta.`;
     setLeoVoiceMessage(message);
     speakLeoMessage(message);
   };
@@ -240,7 +240,7 @@ export default function HomePage() {
     const didSpeak = speakLeoMessage(leoMessage);
 
     if (!didSpeak) {
-      setLeoVoiceMessage("Tu navegador no permite voz en este momento.");
+      setLeoVoiceMessage("No puedo hablar en este navegador por ahora.");
     }
   };
 
@@ -248,7 +248,7 @@ export default function HomePage() {
     const SpeechRecognitionConstructor = getSpeechRecognitionConstructor();
 
     if (!SpeechRecognitionConstructor) {
-      setLeoVoiceMessage("Tu navegador no permite reconocimiento de voz.");
+      setLeoVoiceMessage("No puedo escuchar comandos en este navegador.");
       return;
     }
 
@@ -257,7 +257,7 @@ export default function HomePage() {
     recognition.continuous = false;
     recognition.interimResults = false;
     setIsLeoListening(true);
-    setLeoVoiceMessage("Te escucho. Puedes decir biblioteca, horarios, perfil o iniciar ruta.");
+    setLeoVoiceMessage("Te escucho. Puedes decir un destino, horarios, perfil o iniciar ruta.");
 
     recognition.onresult = (event) => {
       const transcript = event.results[0]?.[0]?.transcript ?? "";
@@ -265,7 +265,7 @@ export default function HomePage() {
     };
 
     recognition.onerror = () => {
-      setLeoVoiceMessage("No pude escuchar bien. Intentalo de nuevo.");
+      setLeoVoiceMessage("No te escuche bien. Intentalo de nuevo.");
     };
 
     recognition.onend = () => {
@@ -290,7 +290,7 @@ export default function HomePage() {
 
     if (command.includes("ubicacion") || command.includes("ubicación")) {
       startTracking();
-      const message = "Voy a buscar tu ubicacion.";
+      const message = "Voy a buscar tu ubicacion para guiarte mejor.";
       setLeoVoiceMessage(message);
       speakLeoMessage(message);
       return;
@@ -312,7 +312,7 @@ export default function HomePage() {
       return;
     }
 
-    const message = `Escuche: ${rawCommand}. No encontre un comando para eso.`;
+    const message = `Escuche: ${rawCommand}. Intenta decir un destino, horarios o iniciar ruta.`;
     setLeoVoiceMessage(message);
     speakLeoMessage(message);
   };
@@ -441,30 +441,30 @@ function getLeoMessage({
   routePreview: CalculatedRoute | null;
 }) {
   if (distanceToDestination !== null && distanceToDestination <= 35) {
-    return `Llegaste a ${destinationName}. Buen recorrido.`;
+    return `Ya estas cerca de ${destinationName}. Hemos llegado.`;
   }
 
   if (activeRoute && destinationName) {
-    return `Ruta activa hacia ${destinationName}. Sigue la linea marcada y revisa los tramos abajo.`;
+    return `Vamos hacia ${destinationName}. Sigue la linea marcada en el mapa.`;
   }
 
   if (geolocationError) {
-    return "No pude usar tu ubicacion. Puedes navegar desde la Entrada principal.";
+    return "No pude usar tu ubicacion. Puedo guiarte desde la Entrada principal.";
   }
 
   if (isLocating) {
-    return "Estoy buscando tu ubicacion para calcular mejor la ruta.";
+    return "Estoy buscando tu ubicacion para darte una ruta mas precisa.";
   }
 
   if (!hasLocation && destinationName) {
-    return `Destino listo: ${destinationName}. Activa Mi ubicacion para iniciar desde tu punto mas cercano.`;
+    return `${destinationName} esta listo. Activa Mi ubicacion para empezar desde tu punto mas cercano.`;
   }
 
   if (routePreview && destinationName) {
-    return `Te recomiendo esta ruta hacia ${destinationName}: ${routePreview.distance} metros aprox.`;
+    return `Tengo una ruta hacia ${destinationName}: ${routePreview.distance} metros aproximadamente.`;
   }
 
-  return "Hola, soy Leo. Busca una sede o elige un destino rapido para empezar.";
+  return "Hola, soy Leo. Elige un destino y te acompano en el recorrido.";
 }
 
 function getRouteStartMessage(
@@ -472,7 +472,7 @@ function getRouteStartMessage(
   route: CalculatedRoute | null,
 ) {
   if (!route) {
-    return `No pude calcular una ruta hacia ${destinationName}. Intenta activar Mi ubicacion o elegir otro destino.`;
+    return `No pude calcular la ruta hacia ${destinationName}. Prueba activar Mi ubicacion o elegir otro destino.`;
   }
 
   const firstStep = route.steps[0];
@@ -481,10 +481,10 @@ function getRouteStartMessage(
     return `Ruta lista hacia ${destinationName}. Sigue la linea marcada en el mapa.`;
   }
 
-  return `Ruta iniciada hacia ${destinationName}. ${formatRouteInstruction(
+  return `Vamos hacia ${destinationName}. ${formatRouteInstruction(
     firstStep.fromName,
     firstStep.toName,
-  )}. Distancia total aproximada: ${route.distance} metros.`;
+  )}. El recorrido es de unos ${route.distance} metros.`;
 }
 
 function formatRouteInstruction(fromName: string, toName: string) {
