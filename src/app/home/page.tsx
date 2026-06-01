@@ -360,6 +360,7 @@ export default function HomePage() {
         }}
         onOpenCameraGuide={() => setIsCameraGuideOpen(true)}
         onStartNavigation={handleStartNavigation}
+        onStartTracking={startTracking}
         onToggleFavorite={handleToggleFavorite}
       />
       <LeoAvatar

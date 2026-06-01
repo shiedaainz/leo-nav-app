@@ -126,8 +126,8 @@ export default function CampusMap({
   const routeEnd = activeRoute?.coordinates.at(-1);
 
   return (
-    <section className="relative mt-5 px-4 pb-[38vh] sm:mt-6 sm:px-6 sm:pb-[46vh]">
-      <div className="relative h-[58vh] min-h-[390px] overflow-hidden rounded-3xl border border-white/10 sm:h-[560px]">
+    <section className="relative mt-4 px-4 pb-[40vh] sm:mt-6 sm:px-6 sm:pb-[46vh]">
+      <div className="relative h-[58vh] min-h-[390px] overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/25 sm:h-[560px]">
         <MapContainer
           center={campusCenter}
           zoom={16}

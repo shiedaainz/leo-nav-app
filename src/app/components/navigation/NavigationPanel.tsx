@@ -1,4 +1,4 @@
-﻿import { Camera, Clock3, MapPinned, Navigation, Star, X } from "lucide-react";
+import { Camera, Clock3, LocateFixed, Navigation, Star, X } from "lucide-react";
 import type { CampusLocation } from "@/data/campusLocations";
 import type { CampusNode } from "@/data/campusGraph";
 import type { CalculatedRoute } from "@/utils/dijkstra";
@@ -16,6 +16,7 @@ interface NavigationPanelProps {
   onCancelNavigation: () => void;
   onOpenCameraGuide: () => void;
   onStartNavigation: () => void;
+  onStartTracking: () => void;
   onToggleFavorite: () => void;
 }
 
@@ -29,6 +30,7 @@ export default function NavigationPanel({
   onCancelNavigation,
   onOpenCameraGuide,
   onStartNavigation,
+  onStartTracking,
   onToggleFavorite,
 }: NavigationPanelProps) {
   const title = selectedLocation?.name ?? "Selecciona un destino";
@@ -62,14 +64,15 @@ export default function NavigationPanel({
   };
 
   return (
-    <section className="fixed bottom-0 left-0 right-0 z-[1200] overflow-hidden rounded-t-[1.75rem] border-t border-white/10 bg-[var(--up-blue)]/95 shadow-2xl backdrop-blur-xl sm:rounded-t-[2rem]">
-      <div className="mx-auto flex max-h-[60vh] max-w-4xl flex-col p-4 sm:max-h-[58vh] sm:p-6">
+    <section className="fixed bottom-0 left-0 right-0 z-[1200] overflow-hidden rounded-t-2xl border-t border-white/10 bg-[var(--up-blue)]/95 shadow-2xl backdrop-blur-xl">
+      <div className="mx-auto flex max-h-[62vh] max-w-4xl flex-col p-4 sm:max-h-[58vh] sm:p-5">
+        <div className="mx-auto mb-3 h-1 w-12 shrink-0 rounded-full bg-white/25" />
         <div className="mb-3 flex shrink-0 items-start justify-between gap-3 sm:mb-4 sm:gap-4">
           <div className="min-w-0">
             <p className="text-xs text-[var(--up-gray)]/80 sm:text-sm">
               {activeRoute ? "Navegando hacia" : "Destino"}
             </p>
-            <h2 className="mt-1 truncate text-lg font-bold sm:text-xl">{title}</h2>
+            <h2 className="mt-1 truncate text-lg font-bold leading-tight sm:text-xl">{title}</h2>
             <p className="mt-1 line-clamp-1 text-xs text-[var(--up-gray)]/80">
               Origen: {originText}
             </p>
@@ -106,7 +109,7 @@ export default function NavigationPanel({
 
         <div className="min-h-0 flex-1 overflow-hidden">
           {activeRoute ? (
-            <div className="flex h-full min-h-0 flex-col rounded-2xl border border-white/10 bg-[var(--up-blue-dark)]/60 p-4">
+            <div className="flex h-full min-h-0 flex-col rounded-xl border border-white/10 bg-[var(--up-blue-dark)]/60 p-4">
               <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
                 <p className="text-sm font-semibold">Instrucciones</p>
                 {distanceLabel && (
@@ -140,7 +143,7 @@ export default function NavigationPanel({
               </p>
 
               {routePreview && (
-                <div className="rounded-2xl border border-white/10 bg-[var(--up-blue-dark)]/60 p-3">
+                <div className="rounded-xl border border-white/10 bg-[var(--up-blue-dark)]/60 p-3">
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold">Ruta recomendada</p>
@@ -191,12 +194,11 @@ export default function NavigationPanel({
           ) : (
             <button
               type="button"
-              onClick={onStartNavigation}
-              disabled={!selectedLocation}
+              onClick={onStartTracking}
               className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-3 py-3 text-sm font-semibold transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60 sm:text-base"
             >
-              <MapPinned size={20} />
-              Elegir ruta
+              <LocateFixed size={20} />
+              Mi ubicacion
             </button>
           )}
         </div>
@@ -208,6 +210,7 @@ export default function NavigationPanel({
 function isGenericNodeName(name: string) {
   return /^Nodo \d+$/i.test(name.trim());
 }
+
 
 
 

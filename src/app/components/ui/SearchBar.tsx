@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { Search, Star } from "lucide-react";
+import { Search, Star, X } from "lucide-react";
 import type { CampusLocation } from "@/data/campusLocations";
 
 interface SearchBarProps {
@@ -30,8 +30,8 @@ export default function SearchBar({
     : [];
 
   return (
-    <section className="relative z-30 mt-5 px-4 sm:mt-6 sm:px-6">
-      <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-[var(--up-blue)] px-4 py-3.5 sm:py-4">
+    <section className="relative z-[1100] mt-4 px-4 sm:mt-6 sm:px-6">
+      <div className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 bg-[var(--up-blue)] px-4 py-3 shadow-2xl shadow-black/20 sm:min-h-14 sm:py-4">
         <Search className="text-[var(--up-gray)]/80" size={20} />
 
         <input
@@ -41,10 +41,21 @@ export default function SearchBar({
           placeholder="A donde quieres ir?"
           className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--up-gray-dark)]"
         />
+
+        {query && (
+          <button
+            type="button"
+            onClick={() => onQueryChange("")}
+            className="rounded-lg bg-white/10 p-1.5 text-[var(--up-gray)] transition hover:bg-white/20 hover:text-white"
+            aria-label="Limpiar busqueda"
+          >
+            <X size={16} />
+          </button>
+        )}
       </div>
 
       {results.length > 0 && (
-        <div className="absolute left-4 right-4 top-full mt-2 max-h-64 overflow-y-auto rounded-2xl border border-white/10 bg-[var(--up-blue)] shadow-2xl sm:left-6 sm:right-6">
+        <div className="absolute left-4 right-4 top-full mt-2 max-h-64 overflow-y-auto rounded-xl border border-white/10 bg-[var(--up-blue)] shadow-2xl sm:left-6 sm:right-6">
           {results.map((location) => {
             const isFavorite = favoriteLocationIds.includes(location.id);
 
@@ -53,7 +64,7 @@ export default function SearchBar({
                 key={location.id}
                 type="button"
                 onClick={() => onSelectLocation(location)}
-                className="flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-white/10"
+                className="flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-white/10 focus:bg-white/10 focus:outline-none"
               >
                 <span
                   className="mt-1 h-3 w-3 shrink-0 rounded-full"
@@ -80,7 +91,7 @@ export default function SearchBar({
       )}
 
       {normalizedQuery && results.length === 0 && (
-        <div className="absolute left-4 right-4 top-full mt-2 rounded-2xl border border-white/10 bg-[var(--up-blue)] px-4 py-3 text-sm text-[var(--up-gray)]/80 shadow-2xl sm:left-6 sm:right-6">
+        <div className="absolute left-4 right-4 top-full mt-2 rounded-xl border border-white/10 bg-[var(--up-blue)] px-4 py-3 text-sm text-[var(--up-gray)]/80 shadow-2xl sm:left-6 sm:right-6">
           No encontre ese destino.
         </div>
       )}
@@ -92,7 +103,7 @@ export default function SearchBar({
       )}
 
       {!query && (
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {locations.map((location) => {
             const isSelected = location.id === selectedLocation?.id;
 
