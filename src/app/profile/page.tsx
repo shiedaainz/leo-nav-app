@@ -3,8 +3,21 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { CalendarDays, Heart, LogOut, MapPinned, ShieldCheck, User } from "lucide-react";
-import { getFavoriteLocationIds } from "@/utils/favorites";
+import {
+  CalendarDays,
+  Heart,
+  LogOut,
+  MapPinned,
+  ShieldCheck,
+  Star,
+  Trash2,
+  User,
+} from "lucide-react";
+import { campusLocations, type CampusLocation } from "@/data/campusLocations";
+import {
+  getFavoriteLocationIds,
+  removeFavoriteLocation,
+} from "@/utils/favorites";
 import { getSchedules } from "@/utils/schedules";
 import { isVisitorSession, logout, type SessionUser } from "@/utils/auth";
 
@@ -16,7 +29,7 @@ export default function ProfilePage() {
     getServerSessionSnapshot,
   );
   const sessionUser = useMemo(() => parseSession(sessionSnapshot), [sessionSnapshot]);
-  const [favoriteCount, setFavoriteCount] = useState(0);
+  const [favoriteLocationIds, setFavoriteLocationIds] = useState<string[]>([]);
   const [scheduleCount, setScheduleCount] = useState(0);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
@@ -36,7 +49,7 @@ export default function ProfilePage() {
     Promise.all([getFavoriteLocationIds(), getSchedules()])
       .then(([favoriteIds, schedules]) => {
         if (isMounted) {
-          setFavoriteCount(favoriteIds.length);
+          setFavoriteLocationIds(favoriteIds);
           setScheduleCount(schedules.length);
         }
       })
@@ -50,6 +63,23 @@ export default function ProfilePage() {
       isMounted = false;
     };
   }, [sessionUser]);
+
+  const favoriteLocations = useMemo(
+    () =>
+      favoriteLocationIds
+        .map((locationId) =>
+          campusLocations.find((location) => location.id === locationId),
+        )
+        .filter((location): location is CampusLocation => Boolean(location)),
+    [favoriteLocationIds],
+  );
+
+  const handleRemoveFavorite = async (locationId: string) => {
+    setFavoriteLocationIds((currentIds) =>
+      currentIds.filter((favoriteId) => favoriteId !== locationId),
+    );
+    await removeFavoriteLocation(locationId);
+  };
 
   const handleLogout = () => {
     logout();
@@ -114,7 +144,7 @@ export default function ProfilePage() {
                 <Heart size={24} />
               </div>
               <span className="text-3xl font-bold">
-                {isLoadingStats ? "--" : favoriteCount}
+                {isLoadingStats ? "--" : favoriteLocationIds.length}
               </span>
             </div>
             <h3 className="font-bold">Favoritos</h3>
@@ -137,6 +167,68 @@ export default function ProfilePage() {
               Clases o actividades guardadas para navegar rapido.
             </p>
           </article>
+        </section>
+
+        <section className="rounded-3xl border border-white/10 bg-[var(--up-blue)]/80 p-5 shadow-2xl">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold">Mis favoritos</h2>
+              <p className="text-sm text-[var(--up-gray)]/80">
+                Accesos rapidos a tus destinos mas usados.
+              </p>
+            </div>
+            <Star className="fill-yellow-300 text-yellow-300" size={24} />
+          </div>
+
+          {isLoadingStats ? (
+            <div className="rounded-2xl border border-dashed border-white/15 p-5 text-sm text-[var(--up-gray)]/80">
+              Cargando favoritos...
+            </div>
+          ) : favoriteLocations.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-white/15 p-5 text-sm text-[var(--up-gray)]/80">
+              Aun no tienes destinos favoritos. Marca una sede con la estrella desde el mapa.
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              {favoriteLocations.map((location) => (
+                <article
+                  key={location.id}
+                  className="rounded-2xl border border-white/10 bg-white/10 p-4"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <h3 className="truncate font-bold">{location.name}</h3>
+                      <p className="mt-1 line-clamp-2 text-sm text-[var(--up-gray)]/80">
+                        {location.description}
+                      </p>
+                    </div>
+                    <span
+                      className="mt-1 h-3 w-3 shrink-0 rounded-full"
+                      style={{ backgroundColor: location.color }}
+                    />
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-3">
+                    <Link
+                      href={`/home?destination=${location.id}`}
+                      className="flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[var(--up-red)] px-4 py-2 text-sm font-semibold transition hover:bg-[var(--up-red-dark)]"
+                    >
+                      <MapPinned size={18} />
+                      Ir
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => void handleRemoveFavorite(location.id)}
+                      className="flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold transition hover:bg-white/20"
+                    >
+                      <Trash2 size={18} />
+                      Quitar
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="grid gap-3 sm:grid-cols-3">
