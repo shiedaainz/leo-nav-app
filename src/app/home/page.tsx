@@ -160,11 +160,27 @@ export default function HomePage() {
   );
   const leoMessage = leoVoiceMessage ?? routeLeoMessage;
 
+  const speakLeoMessage = (message: string) => {
+    if (!("speechSynthesis" in window)) {
+      return false;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(message);
+    utterance.lang = "es-CO";
+    utterance.rate = 0.95;
+    window.speechSynthesis.speak(utterance);
+    return true;
+  };
+
   const handleSelectLocation = (locationToSelect: CampusLocation) => {
     setManualLocationId(locationToSelect.id);
     setActiveRoute(null);
     setIsCameraGuideOpen(false);
     setQuery("");
+    const message = `Destino seleccionado: ${locationToSelect.name}. Cuando estes listo, inicia la ruta.`;
+    setLeoVoiceMessage(message);
+    speakLeoMessage(message);
   };
 
   const handleStartNavigation = () => {
@@ -188,6 +204,10 @@ export default function HomePage() {
     });
 
     setActiveRoute(route);
+
+    const message = getRouteStartMessage(selectedLocation.name, route);
+    setLeoVoiceMessage(message);
+    speakLeoMessage(message);
   };
 
   const handleToggleFavorite = async () => {
@@ -217,16 +237,11 @@ export default function HomePage() {
   };
 
   const handleLeoSpeak = () => {
-    if (!("speechSynthesis" in window)) {
-      setLeoVoiceMessage("Tu navegador no permite voz en este momento.");
-      return;
-    }
+    const didSpeak = speakLeoMessage(leoMessage);
 
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(leoMessage);
-    utterance.lang = "es-CO";
-    utterance.rate = 0.95;
-    window.speechSynthesis.speak(utterance);
+    if (!didSpeak) {
+      setLeoVoiceMessage("Tu navegador no permite voz en este momento.");
+    }
   };
 
   const handleLeoListen = () => {
@@ -275,7 +290,9 @@ export default function HomePage() {
 
     if (command.includes("ubicacion") || command.includes("ubicación")) {
       startTracking();
-      setLeoVoiceMessage("Voy a buscar tu ubicacion.");
+      const message = "Voy a buscar tu ubicacion.";
+      setLeoVoiceMessage(message);
+      speakLeoMessage(message);
       return;
     }
 
@@ -285,7 +302,6 @@ export default function HomePage() {
       command.includes("ruta")
     ) {
       handleStartNavigation();
-      setLeoVoiceMessage("Listo. Inicie la ruta hacia el destino seleccionado.");
       return;
     }
 
@@ -293,11 +309,12 @@ export default function HomePage() {
 
     if (matchedLocation) {
       handleSelectLocation(matchedLocation);
-      setLeoVoiceMessage(`Destino seleccionado: ${matchedLocation.name}.`);
       return;
     }
 
-    setLeoVoiceMessage(`Escuche: ${rawCommand}. No encontre un comando para eso.`);
+    const message = `Escuche: ${rawCommand}. No encontre un comando para eso.`;
+    setLeoVoiceMessage(message);
+    speakLeoMessage(message);
   };
 
   if (!sessionUser) {
@@ -448,6 +465,49 @@ function getLeoMessage({
   }
 
   return "Hola, soy Leo. Busca una sede o elige un destino rapido para empezar.";
+}
+
+function getRouteStartMessage(
+  destinationName: string,
+  route: CalculatedRoute | null,
+) {
+  if (!route) {
+    return `No pude calcular una ruta hacia ${destinationName}. Intenta activar Mi ubicacion o elegir otro destino.`;
+  }
+
+  const firstStep = route.steps[0];
+
+  if (!firstStep) {
+    return `Ruta lista hacia ${destinationName}. Sigue la linea marcada en el mapa.`;
+  }
+
+  return `Ruta iniciada hacia ${destinationName}. ${formatRouteInstruction(
+    firstStep.fromName,
+    firstStep.toName,
+  )}. Distancia total aproximada: ${route.distance} metros.`;
+}
+
+function formatRouteInstruction(fromName: string, toName: string) {
+  const fromIsGeneric = isGenericNodeName(fromName);
+  const toIsGeneric = isGenericNodeName(toName);
+
+  if (fromIsGeneric && toIsGeneric) {
+    return "Continua por el camino marcado";
+  }
+
+  if (fromIsGeneric) {
+    return `Avanza hasta ${toName}`;
+  }
+
+  if (toIsGeneric) {
+    return `Sal desde ${fromName} y continua por el camino`;
+  }
+
+  return `Dirigete de ${fromName} hacia ${toName}`;
+}
+
+function isGenericNodeName(name: string) {
+  return /^Nodo \d+$/i.test(name.trim());
 }
 
 interface SpeechRecognitionResultEvent extends Event {
