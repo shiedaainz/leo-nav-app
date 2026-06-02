@@ -1,4 +1,5 @@
-import { Camera, Clock3, LocateFixed, Navigation, Star, X } from "lucide-react";
+import { Camera, ChevronDown, ChevronUp, Clock3, LocateFixed, Navigation, Star, X } from "lucide-react";
+import { useState } from "react";
 import type { CampusLocation } from "@/data/campusLocations";
 import type { CampusNode } from "@/data/campusGraph";
 import type { CalculatedRoute } from "@/utils/dijkstra";
@@ -33,6 +34,7 @@ export default function NavigationPanel({
   onStartTracking,
   onToggleFavorite,
 }: NavigationPanelProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const title = selectedLocation?.name ?? "Selecciona un destino";
   const originText = nearestStartNode
     ? `${nearestStartNode.node.name} (${nearestStartNode.distance} m de tu GPS)`
@@ -44,11 +46,20 @@ export default function NavigationPanel({
     0;
   const visibleRoute = activeRoute ?? routePreview;
   const distanceLabel = visibleRoute ? `${visibleRoute.distance} m` : null;
+  const panelMaxHeight = isExpanded ? "max-h-[68vh] sm:max-h-[58vh]" : "max-h-[260px]";
 
   return (
     <section className="fixed bottom-0 left-0 right-0 z-[1200] overflow-hidden rounded-t-2xl border-t border-white/10 bg-[var(--up-blue)]/95 shadow-2xl backdrop-blur-xl">
-      <div className="mx-auto flex max-h-[62vh] max-w-4xl flex-col p-4 sm:max-h-[58vh] sm:p-5">
-        <div className="mx-auto mb-3 h-1 w-12 shrink-0 rounded-full bg-white/25" />
+      <div className={`mx-auto flex ${panelMaxHeight} max-w-4xl flex-col p-4 transition-[max-height] duration-300 sm:p-5`}>
+        <button
+          type="button"
+          onClick={() => setIsExpanded((current) => !current)}
+          className="mx-auto mb-3 flex min-h-8 shrink-0 items-center justify-center gap-2 rounded-full bg-white/10 px-4 text-xs font-semibold text-[var(--up-gray)] transition hover:bg-white/20 hover:text-white"
+          aria-label={isExpanded ? "Contraer panel" : "Expandir panel"}
+        >
+          <span className="h-1 w-10 rounded-full bg-white/35" />
+          {isExpanded ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+        </button>
         <div className="mb-3 flex shrink-0 items-start justify-between gap-3 sm:mb-4 sm:gap-4">
           <div className="min-w-0">
             <p className="text-xs text-[var(--up-gray)]/80 sm:text-sm">
@@ -89,7 +100,7 @@ export default function NavigationPanel({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-hidden">
+        <div className={`${isExpanded ? "min-h-0 flex-1 overflow-hidden" : "hidden"}`}>
           {activeRoute ? (
             <div className="flex h-full min-h-0 flex-col rounded-xl border border-white/10 bg-[var(--up-blue-dark)]/60 p-4">
               <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
