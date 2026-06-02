@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+import { LocateFixed } from "lucide-react";
 import type { CampusLocation } from "@/data/campusLocations";
 import type { CalculatedRoute } from "@/utils/dijkstra";
 import type { Coordinates } from "@/utils/geo";
@@ -203,15 +204,22 @@ export default function CampusMap({
           {isGraphEditorEnabled && <GraphEditor />}
         </MapContainer>
 
-        <div className="absolute left-3 top-3 z-[1000] flex max-w-[calc(100%-1.5rem)] flex-col gap-2 sm:left-4 sm:top-4">
+        <div className="absolute right-3 top-3 z-[1000] flex max-w-[calc(100%-1.5rem)] flex-col items-end gap-2 sm:right-4 sm:top-4">
           <button
             type="button"
             onClick={onStartTracking}
-            className="rounded-xl bg-[var(--up-red)] px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-[var(--up-red-dark)] disabled:cursor-wait disabled:opacity-70"
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white text-[var(--up-blue-dark)] shadow-xl transition hover:scale-105 hover:bg-[var(--up-gray)] disabled:cursor-wait disabled:opacity-80"
             disabled={isLocating}
+            aria-label="Ubicarme en el mapa"
           >
-            {isLocating ? "Buscando..." : "Mi ubicacion"}
+            <LocateFixed size={22} className={isLocating ? "animate-pulse" : ""} />
           </button>
+
+          {isLocating && (
+            <p className="rounded-xl bg-[var(--up-blue-dark)]/90 px-3 py-2 text-xs text-white shadow-lg">
+              Buscando posicion...
+            </p>
+          )}
 
           {activeRoute && (
             <p className="rounded-xl bg-[var(--up-blue-dark)]/90 px-3 py-2 text-xs text-white shadow-lg">

@@ -78,7 +78,7 @@ export default function NavigationPanel({
             </p>
             {!usingGps && (
               <p className="mt-2 text-xs text-amber-300">
-                Pulsa Mi ubicacion para calcular desde tu punto mas cercano.
+                Pulsa el boton de ubicacion para iniciar desde tu punto mas cercano.
               </p>
             )}
           </div>
@@ -198,7 +198,7 @@ export default function NavigationPanel({
               className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-3 py-3 text-sm font-semibold transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60 sm:text-base"
             >
               <LocateFixed size={20} />
-              Mi ubicacion
+              Ubicarme
             </button>
           )}
         </div>
