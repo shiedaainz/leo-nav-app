@@ -39,7 +39,7 @@ Con Leo, el usuario puede:
 - Guardar horarios opcionales.
 - Marcar destinos favoritos.
 - Consultar un perfil con resumen de actividad.
-- Usar una camara guiada como apoyo visual.
+- Usar una camara guiada como apoyo visual, con instrucciones sobre la pantalla y voz de Leo.
 
 La aplicacion esta pensada para usarse desde el celular, sin necesidad de instalar obligatoriamente nada.
 
@@ -59,7 +59,9 @@ Por ejemplo, Leo puede indicar:
 
 La idea es que la experiencia sea mas amigable, no tan fria como un mapa tradicional.
 
-Leo tambien puede hablar y escuchar comandos simples. Por ejemplo, el usuario puede pedir una sede por voz o pedir abrir horarios.
+Leo tambien puede hablar y escuchar comandos simples. Por ejemplo, el usuario puede pedir una sede por voz, abrir horarios o iniciar una ruta.
+
+Cuando el usuario abre la camara guiada, Leo tambien participa: avisa que se activo el modo camara, dice hacia donde se dirige la persona y lee la primera indicacion del recorrido.
 
 ## 5. Que hace la aplicacion
 
@@ -83,7 +85,7 @@ Desde ahi puede seleccionar lugares como:
 
 El usuario puede escribir el nombre de un lugar y la app lo busca.
 
-Tambien hay botones rapidos para seleccionar destinos comunes sin escribir.
+Tambien hay un selector rapido para destinos comunes, y la busqueda permite encontrar edificios o puntos importantes agregados al grafo.
 
 ### Ruta recomendada
 
@@ -130,9 +132,19 @@ Por ejemplo, el usuario puede decir biblioteca, perfil, horarios o iniciar ruta.
 
 La app incluye una camara guiada basica.
 
-Cuando hay una ruta activa, el usuario puede abrir la camara y ver una flecha sobre la pantalla como apoyo visual.
+Cuando hay una ruta activa, el usuario puede abrir la camara y ver indicaciones sobre la pantalla como apoyo visual.
+
+La camara muestra direccion, distancia aproximada, referencia siguiente y proximos pasos. Ademas, Leo habla al abrir este modo para que el usuario no dependa solo de leer la pantalla.
 
 Esto no reemplaza el mapa, pero ayuda a que la experiencia sea mas cercana a una guia en tiempo real.
+
+### Administracion de rutas
+
+Leo tambien cuenta con una pantalla para revisar el grafo de rutas.
+
+Esto permite ver los puntos sobre el mapa y cambiar nombres genericos por referencias mas entendibles, como edificios, entradas o puntos de encuentro.
+
+Gracias a esto, las indicaciones pueden sentirse mas naturales para el usuario.
 
 ### Instalacion como app
 
@@ -161,7 +173,8 @@ En palabras simples:
 3. Leo revisa los caminos disponibles.
 4. Leo escoge la ruta mas corta o conveniente.
 5. Leo muestra la ruta en el mapa.
-6. El usuario sigue las indicaciones.
+6. Leo da instrucciones escritas y por voz.
+7. El usuario puede apoyarse en la camara guiada.
 
 ## 7. Beneficios
 
@@ -191,9 +204,9 @@ Leo no es solamente un mapa.
 
 Lo que lo hace diferente es que esta pensado especificamente para navegacion universitaria.
 
-A diferencia de un mapa general, Leo se enfoca en sedes, accesos, rutas internas, horarios y acompanamiento visual.
+A diferencia de un mapa general, Leo se enfoca en sedes, accesos, rutas internas, horarios, favoritos, voz y acompanamiento visual.
 
-Ademas, el asistente Leo hace que la experiencia sea mas cercana y facil de entender.
+Ademas, el asistente Leo hace que la experiencia sea mas cercana y facil de entender, especialmente para personas que no conocen bien la universidad.
 
 ## 9. Demo sugerida
 
@@ -235,13 +248,15 @@ Mostrar la linea dibujada en el mapa y las instrucciones.
 
 ### Paso 7: Mostrar a Leo
 
-Explicar que Leo cambia sus mensajes segun lo que esta pasando.
+Explicar que Leo cambia sus mensajes segun lo que esta pasando y que puede hablar las instrucciones.
 
 ### Paso 8: Abrir camara guiada
 
 Mostrar el boton de camara.
 
-Explicar que en celular funciona mejor cuando la app esta desplegada con HTTPS.
+Explicar que la camara muestra una guia visual encima de la imagen real y que Leo lee la primera instruccion.
+
+Tambien se puede mencionar que en celular funciona mejor cuando la app esta desplegada con HTTPS.
 
 ### Paso 9: Mostrar horarios
 
@@ -263,8 +278,9 @@ Esta version ya permite demostrar la idea principal:
 - Calcular rutas.
 - Mostrar mapas.
 - Guardar horarios.
+- Guardar favoritos.
 - Acompanarlo con Leo.
-- Usar camara guiada basica.
+- Usar camara guiada basica con voz.
 - Instalarse como app web.
 
 ## 11. Limitaciones actuales
@@ -278,6 +294,7 @@ Por ejemplo:
 - La app no reconoce objetos ni edificios con la camara.
 - La ubicacion dentro de edificios no esta incluida.
 - Las rutas dependen de los puntos que ya fueron registrados en el mapa.
+- Las instrucciones mejoran a medida que se nombran mejor los nodos importantes.
 
 Estas limitaciones son normales en un MVP, porque primero se busca demostrar que la idea funciona.
 
@@ -288,7 +305,7 @@ Leo puede crecer mucho mas.
 En futuras versiones se podria agregar:
 
 - Base de datos real para usuarios y horarios.
-- Panel administrativo para registrar nuevas sedes y rutas.
+- Panel administrativo mas completo para registrar nuevas sedes y rutas.
 - Mas salones y edificios.
 - Notificaciones de clases.
 - Mejoras en camara guiada.
