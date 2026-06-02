@@ -223,6 +223,24 @@ export default function HomePage() {
     speakLeoMessage(message);
   };
 
+  const handleOpenCameraGuide = () => {
+    if (!activeRoute || !selectedLocation) {
+      return;
+    }
+
+    setIsCameraGuideOpen(true);
+    const message = getCameraGuideMessage(selectedLocation.name, activeRoute);
+    setLeoVoiceMessage(message);
+    speakLeoMessage(message);
+  };
+
+  const handleCloseCameraGuide = () => {
+    setIsCameraGuideOpen(false);
+    const message = "Volvemos al mapa. Sigue la ruta marcada y revisa las instrucciones cuando lo necesites.";
+    setLeoVoiceMessage(message);
+    speakLeoMessage(message);
+  };
+
   const handleToggleFavorite = async () => {
     if (!selectedLocation) {
       return;
@@ -371,7 +389,7 @@ export default function HomePage() {
           setActiveRoute(null);
           setIsCameraGuideOpen(false);
         }}
-        onOpenCameraGuide={() => setIsCameraGuideOpen(true)}
+        onOpenCameraGuide={handleOpenCameraGuide}
         onStartNavigation={handleStartNavigation}
         onStartTracking={startTracking}
         onToggleFavorite={handleToggleFavorite}
@@ -386,7 +404,7 @@ export default function HomePage() {
         <CameraGuide
           activeRoute={activeRoute}
           destination={selectedLocation}
-          onClose={() => setIsCameraGuideOpen(false)}
+          onClose={handleCloseCameraGuide}
         />
       )}
     </main>
@@ -496,6 +514,16 @@ function getRouteStartMessage(
   }
 
   return `Vamos hacia ${destinationName}. ${firstStep.instruction}. El recorrido es de unos ${route.distance} metros.`;
+}
+
+function getCameraGuideMessage(destinationName: string, route: CalculatedRoute) {
+  const firstStep = route.steps[0];
+
+  if (!firstStep) {
+    return `Modo camara activado. Vamos hacia ${destinationName}. Sigue la ruta marcada en pantalla.`;
+  }
+
+  return `Modo camara activado. Vamos hacia ${destinationName}. ${firstStep.instruction}. Son aproximadamente ${firstStep.distance} metros hasta la siguiente referencia.`;
 }
 
 interface SpeechRecognitionResultEvent extends Event {
