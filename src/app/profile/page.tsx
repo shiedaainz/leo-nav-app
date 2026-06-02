@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import {
   CalendarDays,
+  GitBranch,
   Heart,
   LogOut,
   MapPinned,
@@ -231,7 +232,7 @@ export default function ProfilePage() {
           )}
         </section>
 
-        <section className="grid gap-3 sm:grid-cols-3">
+        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Link
             href="/home"
             className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--up-red)] px-4 py-3 font-semibold transition hover:bg-[var(--up-red-dark)]"
@@ -245,6 +246,13 @@ export default function ProfilePage() {
           >
             <CalendarDays size={20} />
             Horarios
+          </Link>
+          <Link
+            href="/admin/graph"
+            className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-3 font-semibold transition hover:bg-white/20"
+          >
+            <GitBranch size={20} />
+            Grafo
           </Link>
           <button
             type="button"
