@@ -18,14 +18,28 @@ export default function LeoAvatar({
   onSpeak,
 }: LeoAvatarProps) {
   return (
-    <div className="fixed right-3 top-36 z-[900] flex max-w-[calc(100vw-1.5rem)] items-start justify-end gap-2 sm:right-5 sm:top-36">
+    <div className="fixed right-3 top-[15.5rem] z-[900] flex max-w-[calc(100vw-1.5rem)] flex-col items-end gap-2 sm:right-5 sm:top-56">
+      <motion.div
+        animate={{ y: [0, -8, 0] }}
+        transition={{ duration: 2, repeat: Infinity }}
+        className="pointer-events-none relative h-14 w-14 shrink-0 drop-shadow-2xl sm:h-28 sm:w-28"
+      >
+        <Image
+          src="/leo-avatar-cutout.png"
+          alt="Leo"
+          fill
+          sizes="(min-width: 640px) 112px, 56px"
+          className="object-contain"
+        />
+      </motion.div>
+
       <div className="pointer-events-none flex flex-col items-end gap-2">
         <motion.div
           key={message}
           initial={{ opacity: 0, y: 8, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.25 }}
-          className="max-w-[190px] rounded-xl rounded-tr-sm border border-white/15 bg-[var(--up-blue)]/95 px-3.5 py-3 text-xs leading-relaxed text-white shadow-2xl backdrop-blur sm:max-w-xs sm:px-4 sm:text-sm"
+          className="max-w-[170px] rounded-xl rounded-tr-sm border border-white/15 bg-[var(--up-blue)]/95 px-3 py-2.5 text-xs leading-relaxed text-white shadow-2xl backdrop-blur sm:max-w-[260px] sm:px-4 sm:py-3 sm:text-sm"
         >
           {message}
         </motion.div>
@@ -53,20 +67,6 @@ export default function LeoAvatar({
           </button>
         </div>
       </div>
-
-      <motion.div
-        animate={{ y: [0, -8, 0] }}
-        transition={{ duration: 2, repeat: Infinity }}
-        className="pointer-events-none relative h-14 w-14 shrink-0 drop-shadow-2xl sm:h-32 sm:w-32"
-      >
-        <Image
-          src="/leo-avatar-cutout.png"
-          alt="Leo"
-          fill
-          sizes="(min-width: 640px) 128px, 64px"
-          className="object-contain"
-        />
-      </motion.div>
     </div>
   );
 }
