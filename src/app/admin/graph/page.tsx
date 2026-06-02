@@ -1,9 +1,35 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Check, Copy, MapPinned, RotateCcw, Search } from "lucide-react";
+import { Check, Copy, Eye, MapPinned, RotateCcw, Search } from "lucide-react";
 import { campusNodes, type CampusNode } from "@/data/campusGraph";
+import type { LatLngExpression } from "leaflet";
+import type { MapContainerProps, TileLayerProps } from "react-leaflet";
+
+const MapContainer = dynamic<MapContainerProps>(
+  () => import("react-leaflet").then((module) => module.MapContainer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center bg-[var(--up-blue)] text-sm text-[var(--up-gray)]/80">
+        Cargando mapa...
+      </div>
+    ),
+  },
+);
+
+const TileLayer = dynamic<TileLayerProps>(
+  () => import("react-leaflet").then((module) => module.TileLayer),
+  { ssr: false },
+);
+
+const GraphAdminMap = dynamic(() => import("./GraphAdminMap"), {
+  ssr: false,
+});
+
+const campusCenter: LatLngExpression = [7.383545, -72.648346];
 
 function cloneNodes() {
   return campusNodes.map((node) => ({ ...node }));
@@ -12,6 +38,7 @@ function cloneNodes() {
 export default function GraphAdminPage() {
   const [nodes, setNodes] = useState<CampusNode[]>(cloneNodes);
   const [query, setQuery] = useState("");
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const filteredNodes = useMemo(() => {
@@ -41,6 +68,9 @@ export default function GraphAdminPage() {
   );
 
   const exportCode = useMemo(() => createCampusNodesCode(nodes), [nodes]);
+  const selectedNode = selectedNodeId
+    ? nodes.find((node) => node.id === selectedNodeId) ?? null
+    : null;
 
   const updateNodeName = (nodeId: string, name: string) => {
     setNodes((currentNodes) =>
@@ -58,6 +88,7 @@ export default function GraphAdminPage() {
 
   const resetNodes = () => {
     setNodes(cloneNodes());
+    setSelectedNodeId(null);
     setCopied(false);
   };
 
@@ -104,6 +135,41 @@ export default function GraphAdminPage() {
 
         <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
           <div className="rounded-2xl border border-white/10 bg-[var(--up-blue)]/90 p-5 shadow-2xl">
+            <section className="mb-5 overflow-hidden rounded-2xl border border-white/10">
+              <div className="flex items-center justify-between gap-3 bg-[var(--up-blue-dark)]/80 px-4 py-3">
+                <div>
+                  <h2 className="font-bold">Mapa de nodos</h2>
+                  <p className="text-xs text-[var(--up-gray)]/75">
+                    Toca un punto para seleccionarlo y nombrarlo.
+                  </p>
+                </div>
+                {selectedNode && (
+                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-[var(--up-gray)]">
+                    {selectedNode.id}
+                  </span>
+                )}
+              </div>
+
+              <div className="h-[420px]">
+                <MapContainer
+                  center={campusCenter}
+                  zoom={16}
+                  scrollWheelZoom
+                  className="h-full w-full"
+                >
+                  <TileLayer
+                    attribution="&copy; OpenStreetMap contributors"
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <GraphAdminMap
+                    nodes={nodes}
+                    selectedNodeId={selectedNodeId}
+                    onSelectNode={setSelectedNodeId}
+                  />
+                </MapContainer>
+              </div>
+            </section>
+
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-xl font-bold">Editar nodos</h2>
@@ -139,7 +205,11 @@ export default function GraphAdminPage() {
                 return (
                   <article
                     key={node.id}
-                    className="rounded-xl border border-white/10 bg-white/10 p-4"
+                    className={`rounded-xl border p-4 ${
+                      node.id === selectedNodeId
+                        ? "border-[var(--up-red)] bg-[var(--up-red)]/20"
+                        : "border-white/10 bg-white/10"
+                    }`}
                   >
                     <div className="mb-3 flex items-start justify-between gap-3">
                       <div>
@@ -148,11 +218,21 @@ export default function GraphAdminPage() {
                           {node.lat.toFixed(6)}, {node.lng.toFixed(6)}
                         </p>
                       </div>
-                      {hasHumanName && (
-                        <span className="rounded-full bg-[var(--up-red)] px-3 py-1 text-xs font-semibold">
-                          Importante
-                        </span>
-                      )}
+                      <div className="flex shrink-0 items-center gap-2">
+                        {hasHumanName && (
+                          <span className="rounded-full bg-[var(--up-red)] px-3 py-1 text-xs font-semibold">
+                            Importante
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedNodeId(node.id)}
+                          className="rounded-lg bg-white/10 p-2 transition hover:bg-white/20"
+                          aria-label={`Ver ${node.id} en el mapa`}
+                        >
+                          <Eye size={16} />
+                        </button>
+                      </div>
                     </div>
 
                     <label className="block text-sm text-[var(--up-gray)]">
