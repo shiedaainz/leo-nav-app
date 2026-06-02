@@ -3,6 +3,7 @@
 export interface RouteStep {
   fromNodeId: string;
   fromName: string;
+  instruction: string;
   toNodeId: string;
   toName: string;
   distance: number;
@@ -125,8 +126,15 @@ function createRouteSteps(
   for (let index = 1; index < nodeIds.length; index += 1) {
     const node = nodeById.get(nodeIds[index])!;
     const isLastNode = index === nodeIds.length - 1;
+    const turnDirection = !isLastNode
+      ? getTurnDirection({
+          previousNode: nodeById.get(nodeIds[index - 1])!,
+          currentNode: node,
+          nextNode: nodeById.get(nodeIds[index + 1])!,
+        })
+      : null;
 
-    if (!isLastNode && isGenericNodeName(node.name)) {
+    if (!isLastNode && isGenericNodeName(node.name) && !turnDirection) {
       continue;
     }
 
@@ -138,6 +146,12 @@ function createRouteSteps(
     steps.push({
       fromNodeId,
       fromName: fromNode.name,
+      instruction: createInstruction({
+        fromName: fromNode.name,
+        isLastNode,
+        toName: toNode.name,
+        turnDirection,
+      }),
       toNodeId,
       toName: toNode.name,
       distance: calculateSegmentDistance(nodeIds.slice(fromIndex, index + 1), edges),
@@ -169,4 +183,88 @@ function calculateSegmentDistance(nodeIds: string[], edges: CampusEdge[]) {
 
 function isGenericNodeName(name: string) {
   return /^Nodo \d+$/i.test(name.trim());
+}
+
+function createInstruction({
+  fromName,
+  isLastNode,
+  toName,
+  turnDirection,
+}: {
+  fromName: string;
+  isLastNode: boolean;
+  toName: string;
+  turnDirection: "left" | "right" | null;
+}) {
+  if (isLastNode) {
+    return isGenericNodeName(toName)
+      ? "Continua hasta el destino"
+      : `Continua hasta ${toName}`;
+  }
+
+  if (turnDirection === "left") {
+    return "Avanza y gira a la izquierda";
+  }
+
+  if (turnDirection === "right") {
+    return "Avanza y gira a la derecha";
+  }
+
+  if (isGenericNodeName(fromName) && isGenericNodeName(toName)) {
+    return "Continua por el camino marcado";
+  }
+
+  if (isGenericNodeName(fromName)) {
+    return `Avanza hasta ${toName}`;
+  }
+
+  if (isGenericNodeName(toName)) {
+    return `Sal desde ${fromName} y continua por el camino`;
+  }
+
+  return `Dirigete de ${fromName} hacia ${toName}`;
+}
+
+function getTurnDirection({
+  previousNode,
+  currentNode,
+  nextNode,
+}: {
+  previousNode: CampusNode;
+  currentNode: CampusNode;
+  nextNode: CampusNode;
+}) {
+  const incomingBearing = calculateBearing(previousNode, currentNode);
+  const outgoingBearing = calculateBearing(currentNode, nextNode);
+  const angle = normalizeAngle(outgoingBearing - incomingBearing);
+
+  if (Math.abs(angle) < 35 || Math.abs(angle) > 145) {
+    return null;
+  }
+
+  return angle > 0 ? "right" : "left";
+}
+
+function calculateBearing(fromNode: CampusNode, toNode: CampusNode) {
+  const fromLat = toRadians(fromNode.lat);
+  const toLat = toRadians(toNode.lat);
+  const deltaLng = toRadians(toNode.lng - fromNode.lng);
+  const y = Math.sin(deltaLng) * Math.cos(toLat);
+  const x =
+    Math.cos(fromLat) * Math.sin(toLat) -
+    Math.sin(fromLat) * Math.cos(toLat) * Math.cos(deltaLng);
+
+  return (toDegrees(Math.atan2(y, x)) + 360) % 360;
+}
+
+function normalizeAngle(angle: number) {
+  return ((angle + 540) % 360) - 180;
+}
+
+function toRadians(value: number) {
+  return (value * Math.PI) / 180;
+}
+
+function toDegrees(value: number) {
+  return (value * 180) / Math.PI;
 }

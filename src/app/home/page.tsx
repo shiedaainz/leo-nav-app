@@ -482,33 +482,7 @@ function getRouteStartMessage(
     return `Ruta lista hacia ${destinationName}. Sigue la linea marcada en el mapa.`;
   }
 
-  return `Vamos hacia ${destinationName}. ${formatRouteInstruction(
-    firstStep.fromName,
-    firstStep.toName,
-  )}. El recorrido es de unos ${route.distance} metros.`;
-}
-
-function formatRouteInstruction(fromName: string, toName: string) {
-  const fromIsGeneric = isGenericNodeName(fromName);
-  const toIsGeneric = isGenericNodeName(toName);
-
-  if (fromIsGeneric && toIsGeneric) {
-    return "Continua por el camino marcado";
-  }
-
-  if (fromIsGeneric) {
-    return `Avanza hasta ${toName}`;
-  }
-
-  if (toIsGeneric) {
-    return `Sal desde ${fromName} y continua por el camino`;
-  }
-
-  return `Dirigete de ${fromName} hacia ${toName}`;
-}
-
-function isGenericNodeName(name: string) {
-  return /^Nodo \d+$/i.test(name.trim());
+  return `Vamos hacia ${destinationName}. ${firstStep.instruction}. El recorrido es de unos ${route.distance} metros.`;
 }
 
 interface SpeechRecognitionResultEvent extends Event {

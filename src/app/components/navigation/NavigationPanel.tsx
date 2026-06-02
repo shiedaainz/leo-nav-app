@@ -44,24 +44,6 @@ export default function NavigationPanel({
     0;
   const visibleRoute = activeRoute ?? routePreview;
   const distanceLabel = visibleRoute ? `${visibleRoute.distance} m` : null;
-  const formatInstruction = (fromName: string, toName: string) => {
-    const fromIsGeneric = isGenericNodeName(fromName);
-    const toIsGeneric = isGenericNodeName(toName);
-
-    if (fromIsGeneric && toIsGeneric) {
-      return "Continua por el camino marcado";
-    }
-
-    if (fromIsGeneric) {
-      return `Avanza hasta ${toName}`;
-    }
-
-    if (toIsGeneric) {
-      return `Sal desde ${fromName} y continua por el camino`;
-    }
-
-    return `Dirigete de ${fromName} hacia ${toName}`;
-  };
 
   return (
     <section className="fixed bottom-0 left-0 right-0 z-[1200] overflow-hidden rounded-t-2xl border-t border-white/10 bg-[var(--up-blue)]/95 shadow-2xl backdrop-blur-xl">
@@ -126,7 +108,7 @@ export default function NavigationPanel({
                       {index + 1}
                     </span>
                     <span className="min-w-0 text-sm text-[var(--up-gray)]">
-                      {formatInstruction(step.fromName, step.toName)}
+                      {step.instruction}
                       <span className="block text-xs text-[var(--up-gray-dark)]">
                         {step.distance} m aprox.
                       </span>
@@ -206,11 +188,4 @@ export default function NavigationPanel({
     </section>
   );
 }
-
-function isGenericNodeName(name: string) {
-  return /^Nodo \d+$/i.test(name.trim());
-}
-
-
-
 
