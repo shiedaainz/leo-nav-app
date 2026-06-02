@@ -11,6 +11,8 @@ export interface CampusLocation {
   lng: number;
   color: string;
   estimatedMinutes: number;
+  showAsQuickAccess?: boolean;
+  showOnMap?: boolean;
 }
 
 const mainCampusLocations: CampusLocation[] = [
@@ -103,6 +105,8 @@ const graphNodeLocations: CampusLocation[] = campusNodes
       lng: node.lng,
       color: type === "building" ? "#ad3333" : "#003366",
       estimatedMinutes: 5,
+      showAsQuickAccess: false,
+      showOnMap: false,
     };
   });
 

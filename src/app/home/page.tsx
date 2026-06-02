@@ -102,6 +102,16 @@ export default function HomePage() {
     );
   }, [destinationSnapshot, manualLocationId]);
 
+  const mapLocations = useMemo(
+    () =>
+      campusLocations.filter(
+        (campusLocation) =>
+          campusLocation.showOnMap !== false ||
+          campusLocation.id === selectedLocation?.id,
+      ),
+    [selectedLocation],
+  );
+
   const nearestStartNode = useMemo(() => {
     if (!location) {
       return null;
@@ -343,7 +353,7 @@ export default function HomePage() {
         activeRoute={activeRoute}
         geolocationError={error}
         isLocating={isLocating}
-        locations={campusLocations}
+        locations={mapLocations}
         selectedLocation={selectedLocation}
         userLocation={location}
         onStartTracking={startTracking}

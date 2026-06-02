@@ -28,6 +28,12 @@ export default function SearchBar({
         ),
       )
     : [];
+  const quickLocations = locations.filter(
+    (location) =>
+      location.showAsQuickAccess !== false ||
+      favoriteLocationIds.includes(location.id) ||
+      location.id === selectedLocation?.id,
+  );
 
   return (
     <section className="relative z-[1100] mt-4 px-4 sm:mt-6 sm:px-6">
@@ -104,7 +110,7 @@ export default function SearchBar({
 
       {!query && (
         <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {locations.map((location) => {
+          {quickLocations.map((location) => {
             const isSelected = location.id === selectedLocation?.id;
 
             return (
