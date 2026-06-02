@@ -8,12 +8,15 @@ import CampusMap from "../components/map/CampusMap";
 import NavigationPanel from "../components/navigation/NavigationPanel";
 import LeoAvatar from "../components/leo/LeoAvatar";
 import CameraGuide from "../components/navigation/CameraGuide";
-import { campusLocations, type CampusLocation } from "@/data/campusLocations";
+import {
+  campusLocations,
+  destinationNodeById,
+  type CampusLocation,
+} from "@/data/campusLocations";
 import {
   campusEdges,
   campusNodes,
   defaultStartNodeId,
-  locationNodeById,
 } from "@/data/campusGraph";
 import useGeolocation from "@/hooks/useGeolocation";
 import {
@@ -112,7 +115,7 @@ export default function HomePage() {
       return null;
     }
 
-    const destinationNodeId = locationNodeById[selectedLocation.id];
+    const destinationNodeId = destinationNodeById[selectedLocation.id];
 
     if (!destinationNodeId) {
       return null;
@@ -188,7 +191,7 @@ export default function HomePage() {
       return;
     }
 
-    const destinationNodeId = locationNodeById[selectedLocation.id];
+    const destinationNodeId = destinationNodeById[selectedLocation.id];
 
     if (!destinationNodeId) {
       setActiveRoute(null);

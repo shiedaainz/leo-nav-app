@@ -1,4 +1,6 @@
-﻿export type CampusLocationType = "building" | "classroom" | "service" | "library";
+import { campusNodes, locationNodeById as baseLocationNodeById } from "@/data/campusGraph";
+
+export type CampusLocationType = "building" | "classroom" | "service" | "library";
 
 export interface CampusLocation {
   id: string;
@@ -11,7 +13,7 @@ export interface CampusLocation {
   estimatedMinutes: number;
 }
 
-export const campusLocations: CampusLocation[] = [
+const mainCampusLocations: CampusLocation[] = [
   {
     id: "biblioteca",
     name: "Biblioteca",
@@ -83,4 +85,60 @@ export const campusLocations: CampusLocation[] = [
     estimatedMinutes: 5,
   },
 ];
+
+const mainLocationNodeIds = new Set(Object.values(baseLocationNodeById));
+
+const graphNodeLocations: CampusLocation[] = campusNodes
+  .filter((node) => !isGenericNodeName(node.name))
+  .filter((node) => !mainLocationNodeIds.has(node.id))
+  .map((node) => {
+    const type = getGraphNodeLocationType(node.name);
+
+    return {
+      id: `grafo-${node.id}`,
+      name: node.name,
+      type,
+      description: `Punto de referencia del campus: ${node.name}.`,
+      lat: node.lat,
+      lng: node.lng,
+      color: type === "building" ? "#ad3333" : "#003366",
+      estimatedMinutes: 5,
+    };
+  });
+
+export const campusLocations: CampusLocation[] = [
+  ...mainCampusLocations,
+  ...graphNodeLocations,
+];
+
+export const destinationNodeById: Record<string, string> = {
+  ...baseLocationNodeById,
+  ...Object.fromEntries(
+    graphNodeLocations.map((location) => [
+      location.id,
+      location.id.replace("grafo-", ""),
+    ]),
+  ),
+};
+
+function isGenericNodeName(name: string) {
+  return /^Nodo \d+$/i.test(name.trim());
+}
+
+function getGraphNodeLocationType(name: string): CampusLocationType {
+  const normalizedName = name.toLowerCase();
+
+  if (
+    normalizedName.includes("edificio") ||
+    normalizedName.includes("bloque") ||
+    normalizedName.includes("laboratorio") ||
+    normalizedName.includes("teatro") ||
+    normalizedName.includes("gimnasio")
+  ) {
+    return "building";
+  }
+
+  return "service";
+}
+
 
