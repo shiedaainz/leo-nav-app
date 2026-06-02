@@ -204,7 +204,7 @@ export default function CampusMap({
           {isGraphEditorEnabled && <GraphEditor />}
         </MapContainer>
 
-        <div className="absolute bottom-4 right-3 z-[1000] flex max-w-[calc(100%-1.5rem)] flex-col items-end gap-2 sm:bottom-5 sm:right-4">
+        <div className="absolute right-3 top-1/2 z-[1000] flex max-w-[calc(100%-1.5rem)] -translate-y-1/2 flex-col items-end gap-2 sm:right-4">
           <button
             type="button"
             onClick={onStartTracking}
