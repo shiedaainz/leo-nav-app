@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
-import { Search, Star, X } from "lucide-react";
+import { useRef } from "react";
+import { ChevronLeft, ChevronRight, Search, Star, X } from "lucide-react";
 import type { CampusLocation } from "@/data/campusLocations";
 
 interface SearchBarProps {
@@ -20,6 +21,7 @@ export default function SearchBar({
   onQueryChange,
   onSelectLocation,
 }: SearchBarProps) {
+  const quickListRef = useRef<HTMLDivElement>(null);
   const normalizedQuery = normalizeText(query);
   const results = normalizedQuery
     ? locations.filter((location) =>
@@ -34,6 +36,12 @@ export default function SearchBar({
       favoriteLocationIds.includes(location.id) ||
       location.id === selectedLocation?.id,
   );
+  const scrollQuickLocations = (direction: "left" | "right") => {
+    quickListRef.current?.scrollBy({
+      left: direction === "left" ? -220 : 220,
+      behavior: "smooth",
+    });
+  };
 
   return (
     <section className="relative z-[1100] mt-4 px-4 sm:mt-6 sm:px-6">
@@ -109,31 +117,57 @@ export default function SearchBar({
       )}
 
       {!query && (
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {quickLocations.map((location) => {
-            const isSelected = location.id === selectedLocation?.id;
+        <div className="relative mt-3">
+          <button
+            type="button"
+            onClick={() => scrollQuickLocations("left")}
+            className="absolute left-0 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-[var(--up-blue)]/95 text-white shadow-xl transition hover:bg-[var(--up-blue-dark)] sm:flex"
+            aria-label="Ver destinos anteriores"
+          >
+            <ChevronLeft size={17} />
+          </button>
 
-            return (
-              <button
-                key={location.id}
-                type="button"
-                onClick={() => onSelectLocation(location)}
-                className={`shrink-0 rounded-full border px-4 py-2 text-xs font-semibold transition ${
-                  isSelected
-                    ? "border-[var(--up-red)] bg-[var(--up-red)] text-white"
-                    : "border-white/15 bg-white/10 text-[var(--up-gray)] hover:bg-white/20"
-                }`}
-              >
-                {favoriteLocationIds.includes(location.id) && (
-                  <Star
-                    size={12}
-                    className="mr-1 inline fill-yellow-300 text-yellow-300"
-                  />
-                )}
-                {location.name}
-              </button>
-            );
-          })}
+          <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-[1] w-8 bg-gradient-to-r from-[var(--up-blue-dark)] to-transparent" />
+          <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-[1] w-8 bg-gradient-to-l from-[var(--up-blue-dark)] to-transparent" />
+
+          <div
+            ref={quickListRef}
+            className="flex snap-x gap-2 overflow-x-auto px-1 pb-1 sm:px-10 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {quickLocations.map((location) => {
+              const isSelected = location.id === selectedLocation?.id;
+
+              return (
+                <button
+                  key={location.id}
+                  type="button"
+                  onClick={() => onSelectLocation(location)}
+                  className={`shrink-0 snap-start rounded-full border px-4 py-2 text-xs font-semibold transition ${
+                    isSelected
+                      ? "border-[var(--up-red)] bg-[var(--up-red)] text-white"
+                      : "border-white/15 bg-white/10 text-[var(--up-gray)] hover:bg-white/20"
+                  }`}
+                >
+                  {favoriteLocationIds.includes(location.id) && (
+                    <Star
+                      size={12}
+                      className="mr-1 inline fill-yellow-300 text-yellow-300"
+                    />
+                  )}
+                  {location.name}
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => scrollQuickLocations("right")}
+            className="absolute right-0 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-[var(--up-blue)]/95 text-white shadow-xl transition hover:bg-[var(--up-blue-dark)] sm:flex"
+            aria-label="Ver mas destinos"
+          >
+            <ChevronRight size={17} />
+          </button>
         </div>
       )}
     </section>
