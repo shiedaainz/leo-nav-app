@@ -122,17 +122,17 @@ export default function SchedulePage() {
   };
 
   return (
-    <main className="min-h-screen bg-[var(--up-blue-dark)] px-5 py-8 text-white">
+    <main className="min-h-screen bg-[var(--up-blue-dark)] px-4 py-6 text-white sm:px-5 sm:py-8">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-        <header className="flex items-center justify-between gap-4">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm text-[var(--up-gray)]/80">Modulo opcional</p>
-            <h1 className="text-3xl font-bold">Horarios</h1>
+            <h1 className="text-2xl font-bold sm:text-3xl">Horarios</h1>
           </div>
 
           <Link
             href="/home"
-            className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-semibold transition hover:bg-white/20"
+            className="flex min-h-11 items-center justify-center rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-semibold transition hover:bg-white/20"
           >
             Volver al mapa
           </Link>
@@ -141,10 +141,10 @@ export default function SchedulePage() {
         <section className="grid gap-6 lg:grid-cols-[380px_1fr]">
           <form
             onSubmit={handleSubmit}
-            className="rounded-3xl border border-white/10 bg-[var(--up-blue)]/90 p-6 shadow-2xl"
+            className="rounded-2xl border border-white/10 bg-[var(--up-blue)]/90 p-5 shadow-2xl sm:p-6"
           >
             <div className="mb-5 flex items-center gap-3">
-              <div className="rounded-2xl bg-[var(--up-red)] p-3">
+              <div className="rounded-xl bg-[var(--up-red)] p-3">
                 <Plus size={22} />
               </div>
               <div>
@@ -166,7 +166,7 @@ export default function SchedulePage() {
                   value={subject}
                   onChange={(event) => setSubject(event.target.value)}
                   placeholder="Programacion"
-                  className="mt-2 w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-white outline-none transition focus:border-[var(--up-red)]"
+                  className="mt-2 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-white outline-none transition focus:border-[var(--up-red)]"
                 />
               </label>
 
@@ -175,7 +175,7 @@ export default function SchedulePage() {
                 <select
                   value={locationId}
                   onChange={(event) => setLocationId(event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-white outline-none transition focus:border-[var(--up-red)]"
+                  className="mt-2 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-white outline-none transition focus:border-[var(--up-red)]"
                 >
                   {campusLocations.map((location) => (
                     <option key={location.id} value={location.id} className="text-slate-950">
@@ -191,7 +191,7 @@ export default function SchedulePage() {
                   value={classroom}
                   onChange={(event) => setClassroom(event.target.value)}
                   placeholder="Aula o referencia"
-                  className="mt-2 w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-white outline-none transition focus:border-[var(--up-red)]"
+                  className="mt-2 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-white outline-none transition focus:border-[var(--up-red)]"
                 />
               </label>
 
@@ -201,7 +201,7 @@ export default function SchedulePage() {
                   <select
                     value={day}
                     onChange={(event) => setDay(event.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-white outline-none transition focus:border-[var(--up-red)]"
+                    className="mt-2 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-white outline-none transition focus:border-[var(--up-red)]"
                   >
                     {days.map((dayOption) => (
                       <option key={dayOption} value={dayOption} className="text-slate-950">
@@ -217,7 +217,7 @@ export default function SchedulePage() {
                     type="time"
                     value={startTime}
                     onChange={(event) => setStartTime(event.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-white outline-none transition focus:border-[var(--up-red)]"
+                    className="mt-2 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-white outline-none transition focus:border-[var(--up-red)]"
                   />
                 </label>
 
@@ -227,7 +227,7 @@ export default function SchedulePage() {
                     type="time"
                     value={endTime}
                     onChange={(event) => setEndTime(event.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-white outline-none transition focus:border-[var(--up-red)]"
+                    className="mt-2 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-white outline-none transition focus:border-[var(--up-red)]"
                   />
                 </label>
               </div>
@@ -241,7 +241,7 @@ export default function SchedulePage() {
               <button
                 type="submit"
                 disabled={isSaving}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--up-red)] py-3 font-semibold transition hover:bg-[var(--up-red-dark)] disabled:cursor-wait disabled:opacity-70"
+                className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--up-red)] py-3 font-semibold transition hover:bg-[var(--up-red-dark)] disabled:cursor-wait disabled:opacity-70"
               >
                 <CalendarDays size={20} />
                 {isSaving
@@ -257,7 +257,7 @@ export default function SchedulePage() {
                 <button
                   type="button"
                   onClick={clearForm}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 py-3 font-semibold transition hover:bg-white/20"
+                  className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 py-3 font-semibold transition hover:bg-white/20"
                 >
                   <X size={20} />
                   Cancelar edicion
@@ -266,7 +266,7 @@ export default function SchedulePage() {
             </div>
           </form>
 
-          <section className="rounded-3xl border border-white/10 bg-[var(--up-blue)]/80 p-6 shadow-2xl">
+          <section className="rounded-2xl border border-white/10 bg-[var(--up-blue)]/80 p-5 shadow-2xl sm:p-6">
             <div className="mb-5 flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-bold">Mis clases</h2>
@@ -292,7 +292,7 @@ export default function SchedulePage() {
                   return (
                     <article
                       key={schedule.id}
-                      className="rounded-2xl border border-white/10 bg-white/10 p-4"
+                      className="rounded-xl border border-white/10 bg-white/10 p-4"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">
@@ -327,7 +327,7 @@ export default function SchedulePage() {
 
                       <Link
                         href={`/home?destination=${schedule.locationId}`}
-                        className="mt-4 flex items-center justify-center gap-2 rounded-2xl bg-[var(--up-red)] px-4 py-3 text-sm font-semibold transition hover:bg-[var(--up-red-dark)]"
+                        className="mt-4 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[var(--up-red)] px-4 py-3 text-sm font-semibold transition hover:bg-[var(--up-red-dark)]"
                       >
                         <MapPinned size={18} />
                         Ir
