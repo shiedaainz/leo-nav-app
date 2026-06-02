@@ -16,7 +16,7 @@ export interface CampusEdge {
 export const campusNodes: CampusNode[] = [
   {
     id: "nodo-1",
-    name: "Nodo 1",
+    name: "Busto del Padre Faria",
     lat: 7.386024,
     lng: -72.648726,
   },
@@ -28,7 +28,7 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-3",
-    name: "Nodo 3",
+    name: "Entrada a la cancha",
     lat: 7.384822,
     lng: -72.648114,
   },
@@ -190,7 +190,7 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-30",
-    name: "Nodo 30",
+    name: "Edificio Eduardo Cote Lamus (EC)",
     lat: 7.387370,
     lng: -72.649595,
   },
@@ -202,7 +202,7 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-32",
-    name: "Nodo 32",
+    name: "Edificio Francisco Jose de Caldas (FJ)",
     lat: 7.387583,
     lng: -72.649477,
   },
@@ -262,7 +262,7 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-42",
-    name: "Nodo 42",
+    name: "Edificio Jorge Gaitan Duran (JG)",
     lat: 7.387950,
     lng: -72.650174,
   },
@@ -280,13 +280,13 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-45",
-    name: "Nodo 45",
+    name: "Edificio Virgilio Barco (VB)",
     lat: 7.387625,
     lng: -72.650351,
   },
   {
     id: "nodo-46",
-    name: "Nodo 46",
+    name: "Edificio Ramon Gonzalez Valencia (RG)",
     lat: 7.387498,
     lng: -72.650329,
   },
@@ -304,7 +304,7 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-49",
-    name: "Nodo 49",
+    name: "Nuevo Laboratorio de Suelos e Ingenieria (LAB)",
     lat: 7.387311,
     lng: -72.650346,
   },
@@ -316,13 +316,13 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-51",
-    name: "Nodo 51",
+    name: "Edificio Enrique Rochereaux (ER)",
     lat: 7.386902,
     lng: -72.649986,
   },
   {
     id: "nodo-52",
-    name: "Nodo 52",
+    name: "Edificio Camilo Daza (CD)",
     lat: 7.387115,
     lng: -72.649857,
   },
@@ -340,7 +340,7 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-55",
-    name: "Nodo 55",
+    name: "Bloque administrativo",
     lat: 7.386216,
     lng: -72.649203,
   },
@@ -376,7 +376,7 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-61",
-    name: "Nodo 61",
+    name: "Edificio Marco Fidel Suarez (MF)",
     lat: 7.386279,
     lng: -72.649911,
   },
@@ -394,7 +394,7 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-64",
-    name: "Nodo 64",
+    name: "Invernadero",
     lat: 7.385785,
     lng: -72.649552,
   },
@@ -406,13 +406,13 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-66",
-    name: "Nodo 66",
+    name: "Edificio Anfiteatro (ANF)",
     lat: 7.384630,
     lng: -72.649321,
   },
   {
     id: "nodo-67",
-    name: "Nodo 67",
+    name: "Entrada al coliseo",
     lat: 7.384295,
     lng: -72.648935,
   },
@@ -424,19 +424,19 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-69",
-    name: "Nodo 69",
+    name: "Registro y control",
     lat: 7.384380,
     lng: -72.648066,
   },
   {
     id: "nodo-70",
-    name: "Nodo 70",
+    name: "Salon de los espejos",
     lat: 7.383790,
     lng: -72.648720,
   },
   {
     id: "nodo-71",
-    name: "Nodo 71",
+    name: "Edificio Gimnasio (GN)",
     lat: 7.383683,
     lng: -72.648806,
   },
@@ -454,19 +454,19 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-74",
-    name: "Nodo 74",
+    name: "Edificio Simon Bolivar (SB)",
     lat: 7.384620,
     lng: -72.647894,
   },
   {
     id: "nodo-75",
-    name: "Nodo 75",
+    name: "Cafeteria",
     lat: 7.384992,
     lng: -72.648050,
   },
   {
     id: "nodo-76",
-    name: "Nodo 76",
+    name: "Edificio Francisco de Paula Santander (FP)",
     lat: 7.385322,
     lng: -72.648227,
   },
@@ -478,19 +478,19 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-78",
-    name: "Nodo 78",
+    name: "Edificio Planta de Lacteos (PL)",
     lat: 7.385822,
     lng: -72.648318,
   },
   {
     id: "nodo-79",
-    name: "Nodo 79",
+    name: "Edificio Antonio Jose Betancour (AJ)",
     lat: 7.386093,
     lng: -72.648463,
   },
   {
     id: "nodo-80",
-    name: "Nodo 80",
+    name: "Edificio Eduardo Canal (EC)",
     lat: 7.386290,
     lng: -72.648463,
   },
@@ -502,7 +502,7 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-82",
-    name: "Nodo 82",
+    name: "Entrada principal UP",
     lat: 7.386269,
     lng: -72.648259,
   },
@@ -520,13 +520,13 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-85",
-    name: "Nodo 85",
+    name: "Almacen (ALM)",
     lat: 7.386998,
     lng: -72.648704,
   },
   {
     id: "nodo-86",
-    name: "Nodo 86",
+    name: "Nuevo Bloque Bienestar Universitario (BU)",
     lat: 7.387141,
     lng: -72.649428,
   },
@@ -712,7 +712,7 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-117",
-    name: "Nodo 117",
+    name: "Llegada a los semaforos",
     lat: 7.382614,
     lng: -72.648007,
   },
@@ -976,7 +976,7 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-161",
-    name: "Nodo 161",
+    name: "Teatro Jauregui",
     lat: 7.375395,
     lng: -72.649825,
   },
@@ -1018,7 +1018,7 @@ export const campusNodes: CampusNode[] = [
   },
   {
     id: "nodo-168",
-    name: "Nodo 168",
+    name: "Edificio Administrativo de Posgrados",
     lat: 7.377166,
     lng: -72.648554,
   },
