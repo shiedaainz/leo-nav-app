@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../components/ui/Header";
 import SearchBar from "../components/ui/SearchBar";
@@ -22,6 +22,7 @@ import useGeolocation from "@/hooks/useGeolocation";
 import {
   calculateShortestRoute,
   type CalculatedRoute,
+  type RouteStep,
 } from "@/utils/dijkstra";
 import { calculateDistanceInMeters, findNearestNode } from "@/utils/geo";
 import { logout, type SessionUser } from "@/utils/auth";
@@ -51,6 +52,7 @@ export default function HomePage() {
   const [favoriteLocationIds, setFavoriteLocationIds] = useState<string[]>([]);
   const [isLeoListening, setIsLeoListening] = useState(false);
   const [leoVoiceMessage, setLeoVoiceMessage] = useState<string | null>(null);
+  const lastSpokenStepKeyRef = useRef<string | null>(null);
   const { error, isLocating, location, startTracking } = useGeolocation();
 
   useEffect(() => {
@@ -150,10 +152,55 @@ export default function HomePage() {
     });
   }, [location, selectedLocation]);
 
+  const routeProgress = useMemo(
+    () => getRouteProgress(activeRoute, location),
+    [activeRoute, location],
+  );
+
+  const currentRouteStep =
+    activeRoute?.steps[routeProgress.currentStepIndex] ?? activeRoute?.steps[0] ?? null;
+
+  useEffect(() => {
+    if (!activeRoute || !selectedLocation || !currentRouteStep || !location) {
+      return;
+    }
+
+    const stepKey = `${currentRouteStep.fromNodeId}-${currentRouteStep.toNodeId}`;
+
+    if (stepKey === lastSpokenStepKeyRef.current) {
+      return;
+    }
+
+    lastSpokenStepKeyRef.current = stepKey;
+
+    if (routeProgress.currentStepIndex === 0) {
+      return;
+    }
+
+    const message = getStepProgressMessage(currentRouteStep, routeProgress.distanceToNextStep);
+    const timeoutId = window.setTimeout(() => {
+      setLeoVoiceMessage(message);
+      speakLeoMessage(message);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [
+    activeRoute,
+    currentRouteStep,
+    location,
+    routeProgress.currentStepIndex,
+    routeProgress.distanceToNextStep,
+    selectedLocation,
+  ]);
+
   const routeLeoMessage = useMemo(
     () =>
       getLeoMessage({
         activeRoute,
+        currentStep: currentRouteStep,
+        distanceToNextStep: routeProgress.distanceToNextStep,
         destinationName: selectedLocation?.name,
         distanceToDestination,
         geolocationError: error,
@@ -163,17 +210,19 @@ export default function HomePage() {
       }),
     [
       activeRoute,
+      currentRouteStep,
       distanceToDestination,
       error,
       isLocating,
       location,
+      routeProgress.distanceToNextStep,
       routePreview,
       selectedLocation,
     ],
   );
   const leoMessage = leoVoiceMessage ?? routeLeoMessage;
 
-  const speakLeoMessage = (message: string) => {
+  function speakLeoMessage(message: string) {
     if (!("speechSynthesis" in window)) {
       return false;
     }
@@ -184,12 +233,13 @@ export default function HomePage() {
     utterance.rate = 0.95;
     window.speechSynthesis.speak(utterance);
     return true;
-  };
+  }
 
   const handleSelectLocation = (locationToSelect: CampusLocation) => {
     setManualLocationId(locationToSelect.id);
     setActiveRoute(null);
     setIsCameraGuideOpen(false);
+    lastSpokenStepKeyRef.current = null;
     setQuery("");
     const message = `${locationToSelect.name} seleccionado. Cuando quieras, iniciamos la ruta.`;
     setLeoVoiceMessage(message);
@@ -217,6 +267,7 @@ export default function HomePage() {
     });
 
     setActiveRoute(route);
+    lastSpokenStepKeyRef.current = null;
 
     const message = getRouteStartMessage(selectedLocation.name, route);
     setLeoVoiceMessage(message);
@@ -229,7 +280,12 @@ export default function HomePage() {
     }
 
     setIsCameraGuideOpen(true);
-    const message = getCameraGuideMessage(selectedLocation.name, activeRoute);
+    const message = getCameraGuideMessage(
+      selectedLocation.name,
+      activeRoute,
+      routeProgress.currentStepIndex,
+      routeProgress.distanceToNextStep,
+    );
     setLeoVoiceMessage(message);
     speakLeoMessage(message);
   };
@@ -388,8 +444,11 @@ export default function HomePage() {
         onCancelNavigation={() => {
           setActiveRoute(null);
           setIsCameraGuideOpen(false);
+          lastSpokenStepKeyRef.current = null;
         }}
         onOpenCameraGuide={handleOpenCameraGuide}
+        currentStepIndex={routeProgress.currentStepIndex}
+        distanceToNextStep={routeProgress.distanceToNextStep}
         onStartNavigation={handleStartNavigation}
         onStartTracking={startTracking}
         onToggleFavorite={handleToggleFavorite}
@@ -403,7 +462,9 @@ export default function HomePage() {
       {isCameraGuideOpen && activeRoute && (
         <CameraGuide
           activeRoute={activeRoute}
+          currentStepIndex={routeProgress.currentStepIndex}
           destination={selectedLocation}
+          distanceToNextStep={routeProgress.distanceToNextStep}
           onClose={handleCloseCameraGuide}
         />
       )}
@@ -457,6 +518,8 @@ function getServerDestinationSnapshot() {
 
 function getLeoMessage({
   activeRoute,
+  currentStep,
+  distanceToNextStep,
   destinationName,
   distanceToDestination,
   geolocationError,
@@ -465,6 +528,8 @@ function getLeoMessage({
   routePreview,
 }: {
   activeRoute: CalculatedRoute | null;
+  currentStep: RouteStep | null;
+  distanceToNextStep: number | null;
   destinationName?: string;
   distanceToDestination: number | null;
   geolocationError: string | null;
@@ -477,6 +542,15 @@ function getLeoMessage({
   }
 
   if (activeRoute && destinationName) {
+    if (currentStep) {
+      const distanceText =
+        distanceToNextStep !== null
+          ? ` Te faltan unos ${distanceToNextStep} metros para la siguiente referencia.`
+          : "";
+
+      return `Vamos hacia ${destinationName}. ${currentStep.instruction}.${distanceText}`;
+    }
+
     return `Vamos hacia ${destinationName}. Sigue la linea marcada en el mapa.`;
   }
 
@@ -516,14 +590,77 @@ function getRouteStartMessage(
   return `Vamos hacia ${destinationName}. ${firstStep.instruction}. El recorrido es de unos ${route.distance} metros.`;
 }
 
-function getCameraGuideMessage(destinationName: string, route: CalculatedRoute) {
-  const firstStep = route.steps[0];
+function getCameraGuideMessage(
+  destinationName: string,
+  route: CalculatedRoute,
+  currentStepIndex: number,
+  distanceToNextStep: number | null,
+) {
+  const currentStep = route.steps[currentStepIndex] ?? route.steps[0];
 
-  if (!firstStep) {
+  if (!currentStep) {
     return `Modo camara activado. Vamos hacia ${destinationName}. Sigue la ruta marcada en pantalla.`;
   }
 
-  return `Modo camara activado. Vamos hacia ${destinationName}. ${firstStep.instruction}. Son aproximadamente ${firstStep.distance} metros hasta la siguiente referencia.`;
+  const distance = distanceToNextStep ?? currentStep.distance;
+
+  return `Modo camara activado. Vamos hacia ${destinationName}. ${currentStep.instruction}. Son aproximadamente ${distance} metros hasta la siguiente referencia.`;
+}
+
+function getStepProgressMessage(step: RouteStep, distanceToNextStep: number | null) {
+  if (distanceToNextStep !== null && distanceToNextStep <= 25) {
+    return `Estas cerca de ${step.toName}. Preparate para el siguiente tramo.`;
+  }
+
+  const distanceText =
+    distanceToNextStep !== null
+      ? ` Te faltan unos ${distanceToNextStep} metros.`
+      : "";
+
+  return `${step.instruction}.${distanceText}`;
+}
+
+function getRouteProgress(
+  route: CalculatedRoute | null,
+  userLocation: { lat: number; lng: number } | null,
+) {
+  if (!route || !userLocation || route.steps.length === 0) {
+    return {
+      currentStepIndex: 0,
+      distanceToNextStep: null,
+    };
+  }
+
+  const routeNodes = campusNodes.filter((node) => route.nodeIds.includes(node.id));
+  const nearestRouteNode = findNearestNode(userLocation, routeNodes);
+
+  if (!nearestRouteNode) {
+    return {
+      currentStepIndex: 0,
+      distanceToNextStep: null,
+    };
+  }
+
+  const nearestNodeIndex = route.nodeIds.indexOf(nearestRouteNode.node.id);
+  const nextStepIndex = route.steps.findIndex((step) => {
+    const stepTargetIndex = route.nodeIds.indexOf(step.toNodeId);
+
+    return stepTargetIndex > nearestNodeIndex;
+  });
+  const currentStepIndex =
+    nextStepIndex === -1 ? Math.max(route.steps.length - 1, 0) : nextStepIndex;
+  const currentStep = route.steps[currentStepIndex];
+  const currentStepNode = campusNodes.find((node) => node.id === currentStep?.toNodeId);
+
+  return {
+    currentStepIndex,
+    distanceToNextStep: currentStepNode
+      ? calculateDistanceInMeters(userLocation, {
+          lat: currentStepNode.lat,
+          lng: currentStepNode.lng,
+        })
+      : null,
+  };
 }
 
 interface SpeechRecognitionResultEvent extends Event {

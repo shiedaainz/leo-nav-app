@@ -15,13 +15,17 @@ import type { CalculatedRoute } from "@/utils/dijkstra";
 
 interface CameraGuideProps {
   activeRoute: CalculatedRoute;
+  currentStepIndex: number;
   destination: CampusLocation | null;
+  distanceToNextStep: number | null;
   onClose: () => void;
 }
 
 export default function CameraGuide({
   activeRoute,
+  currentStepIndex,
   destination,
+  distanceToNextStep,
   onClose,
 }: CameraGuideProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -77,9 +81,9 @@ export default function CameraGuide({
     };
   }, []);
 
-  const firstStep = activeRoute.steps[0];
-  const nextSteps = activeRoute.steps.slice(0, 3);
-  const instruction = firstStep?.instruction ?? "Sigue la ruta marcada en el mapa.";
+  const currentStep = activeRoute.steps[currentStepIndex] ?? activeRoute.steps[0];
+  const nextSteps = activeRoute.steps.slice(currentStepIndex, currentStepIndex + 3);
+  const instruction = currentStep?.instruction ?? "Sigue la ruta marcada en el mapa.";
   const instructionLower = instruction.toLowerCase();
   const DirectionIcon = instructionLower.includes("izquierda")
     ? CornerUpLeft
@@ -135,7 +139,9 @@ export default function CameraGuide({
         <div className="w-full rounded-3xl bg-black/55 px-5 py-4 shadow-2xl backdrop-blur">
           <p className="text-xl font-bold leading-tight sm:text-2xl">{instruction}</p>
           <p className="mt-2 text-sm text-white/75">
-            {firstStep ? `${firstStep.distance} m aprox.` : "Sigue la ruta marcada en el mapa."}
+            {currentStep
+              ? `${distanceToNextStep ?? currentStep.distance} m aprox.`
+              : "Sigue la ruta marcada en el mapa."}
           </p>
         </div>
       </div>
@@ -153,7 +159,8 @@ export default function CameraGuide({
                     Paso actual
                   </div>
                   <p className="mt-2 text-lg font-bold">
-                    1 de {Math.max(activeRoute.steps.length, 1)}
+                    {Math.min(currentStepIndex + 1, Math.max(activeRoute.steps.length, 1))} de{" "}
+                    {Math.max(activeRoute.steps.length, 1)}
                   </p>
                 </div>
                 <div className="rounded-2xl bg-white/10 p-3">
@@ -162,7 +169,7 @@ export default function CameraGuide({
                     Referencia
                   </div>
                   <p className="mt-2 truncate text-sm font-semibold">
-                    {firstStep?.toName ?? destination?.name ?? "Ruta"}
+                    {currentStep?.toName ?? destination?.name ?? "Ruta"}
                   </p>
                 </div>
               </div>
@@ -175,7 +182,7 @@ export default function CameraGuide({
                       className="flex items-center gap-3 rounded-2xl bg-white/5 px-3 py-2 text-sm text-white/75"
                     >
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold">
-                        {index + 2}
+                        {currentStepIndex + index + 2}
                       </span>
                       <span className="min-w-0 truncate">{step.instruction}</span>
                     </li>

@@ -6,6 +6,8 @@ import type { CalculatedRoute } from "@/utils/dijkstra";
 
 interface NavigationPanelProps {
   activeRoute: CalculatedRoute | null;
+  currentStepIndex: number;
+  distanceToNextStep: number | null;
   nearestStartNode: {
     node: CampusNode;
     distance: number;
@@ -23,6 +25,8 @@ interface NavigationPanelProps {
 
 export default function NavigationPanel({
   activeRoute,
+  currentStepIndex,
+  distanceToNextStep,
   nearestStartNode,
   isSelectedFavorite,
   routePreview,
@@ -47,6 +51,7 @@ export default function NavigationPanel({
   const visibleRoute = activeRoute ?? routePreview;
   const distanceLabel = visibleRoute ? `${visibleRoute.distance} m` : null;
   const panelMaxHeight = isExpanded ? "max-h-[68vh] sm:max-h-[58vh]" : "max-h-[260px]";
+  const currentStep = activeRoute?.steps[currentStepIndex] ?? activeRoute?.steps[0];
 
   return (
     <section className="fixed bottom-0 left-0 right-0 z-[1200] overflow-hidden rounded-t-2xl border-t border-white/10 bg-[var(--up-blue)]/95 shadow-2xl backdrop-blur-xl">
@@ -104,7 +109,14 @@ export default function NavigationPanel({
           {activeRoute ? (
             <div className="flex h-full min-h-0 flex-col rounded-xl border border-white/10 bg-[var(--up-blue-dark)]/60 p-4">
               <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
-                <p className="text-sm font-semibold">Instrucciones</p>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold">Paso actual</p>
+                  {currentStep && (
+                    <p className="mt-1 line-clamp-2 text-xs text-[var(--up-gray)]/75">
+                      {currentStep.instruction}
+                    </p>
+                  )}
+                </div>
                 {distanceLabel && (
                   <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-[var(--up-gray)]">
                     {distanceLabel}
@@ -112,13 +124,36 @@ export default function NavigationPanel({
                 )}
               </div>
 
+              {distanceToNextStep !== null && currentStep && (
+                <div className="mb-3 rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-xs text-[var(--up-gray)]">
+                  Siguiente referencia: {currentStep.toName} · {distanceToNextStep} m aprox.
+                </div>
+              )}
+
               <ol className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-2">
                 {activeRoute.steps.map((step, index) => (
-                  <li key={`${step.fromNodeId}-${step.toNodeId}`} className="flex gap-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--up-red)] text-xs font-bold">
+                  <li
+                    key={`${step.fromNodeId}-${step.toNodeId}`}
+                    className={`flex gap-3 rounded-xl p-2 transition ${
+                      index === currentStepIndex
+                        ? "bg-white/10 text-white"
+                        : index < currentStepIndex
+                          ? "text-[var(--up-gray-dark)]"
+                          : "text-[var(--up-gray)]"
+                    }`}
+                  >
+                    <span
+                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                        index === currentStepIndex
+                          ? "bg-[var(--up-red)] text-white"
+                          : index < currentStepIndex
+                            ? "bg-white/10 text-[var(--up-gray-dark)]"
+                            : "bg-white/15 text-white"
+                      }`}
+                    >
                       {index + 1}
                     </span>
-                    <span className="min-w-0 text-sm text-[var(--up-gray)]">
+                    <span className="min-w-0 text-sm">
                       {step.instruction}
                       <span className="block text-xs text-[var(--up-gray-dark)]">
                         {step.distance} m aprox.
